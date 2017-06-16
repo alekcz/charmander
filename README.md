@@ -21,7 +21,7 @@ A clojure library to make working with firebase easier
 
 ;; In your ns statement:
 (ns my.ns
-  (:require [charmander.core :as :charm]))
+  (:require [charmander.core :as charm]))
 
 ```
 
