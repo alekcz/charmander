@@ -2,6 +2,8 @@
 
 A clojure library to make working with firebase easier
 
+[![Build Status](https://travis-ci.org/alekcz/charmander.svg?branch=master)](https://travis-ci.org/alekcz/charmander)
+
 ## Why?
 
 - Authentication, email verification and password resets are tedious and hard. 
