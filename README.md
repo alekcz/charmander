@@ -79,8 +79,11 @@ Validates firebase tokens. Validating tokens doesn't require an admin or service
 
 ## Admin 
 
-Manages user data and authentication using your firebase admin or service account credentials using the email/password sign-in provider.   
-At the moment only one firebase app can be used at a time.   
+Manages user data and authentication using your firebase admin or service account credentials using the email/password sign-in provider. At the moment only one firebase app can be used at a time.   
+
+The Admin API is based on the Java Firebase Admin SDK v6.8.0
+
+
 
 ### Initializing your admin account
 
