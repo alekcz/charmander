@@ -39,7 +39,7 @@
 
 ; public methods
 
-(defn init-admin [key-file-json database-name]
+(defn init [key-file-json database-name]
   (let [options (build-firebase-options key-file-json database-name)]
     (. FirebaseApp initializeApp options)))
 

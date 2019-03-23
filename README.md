@@ -21,7 +21,8 @@ A clojure library to make working with firebase easier
 
 ;; In your ns statement:
 (ns my.ns
-  (:require [charmander.core :as charm]))
+  (:require [charmander.core :as charm]
+            [charmander.admin :as charm-admin]))
 
 ```
 
@@ -95,7 +96,7 @@ The Admin API is based on the Java Firebase Admin SDK v6.8.0
 3. initialize the admin functions in `charmander`
 
 ```clojure
-(charm/init-admin "/path/to/firebase/key.json" "database-name")  ;; you may need to create a database first
+(charm-admin/init "/path/to/firebase/key.json" "database-name")  ;; you may need to create a database first
 ```
 
 ### Managing user accounts
@@ -103,7 +104,7 @@ The admin api only allows the creating of users using the email/password sign-in
 
 ```clojure
 
-(charm/create-user "email@domain.com" "superstrong6characterpassword")  
+(charm-admin/create-user "email@domain.com" "superstrong6characterpassword")  
 ;;{   
 ;;    :email email@domain.com
 ;;    :email-verified false
@@ -115,7 +116,7 @@ The admin api only allows the creating of users using the email/password sign-in
 ;;    :disabled false
 ;;}
 
-(charm/get-user "vMnMJvS28kWr5pb6sByHULMLelJ3")  
+(charm-admin/get-user "vMnMJvS28kWr5pb6sByHULMLelJ3")  
 ;;{   
 ;;    :email email@domain.com
 ;;    :email-verified true
@@ -127,7 +128,7 @@ The admin api only allows the creating of users using the email/password sign-in
 ;;    :disabled false
 ;;}
 
-(charm/get-user-by-email "email@domain.com")  
+(charm-admin/get-user-by-email "email@domain.com")  
 ;;{   
 ;;    :email email@domain.com
 ;;    :email-verified true
@@ -139,7 +140,7 @@ The admin api only allows the creating of users using the email/password sign-in
 ;;    :disabled false
 ;;}
 
-(charm/set-user-email "vMnMJvS28kWr5pb6sByHULMLelJ3" "tony@hawk.cool")  
+(charm-admin/set-user-email "vMnMJvS28kWr5pb6sByHULMLelJ3" "tony@hawk.cool")  
 ;;{   
 ;;    :email tony@hawk.cool
 ;;    :email-verified false
@@ -151,7 +152,7 @@ The admin api only allows the creating of users using the email/password sign-in
 ;;    :disabled false
 ;;}
 
-(charm/set-user-password "vMnMJvS28kWr5pb6sByHULMLelJ3" "5tr0ngp455w0rd")  
+(charm-admin/set-user-password "vMnMJvS28kWr5pb6sByHULMLelJ3" "5tr0ngp455w0rd")  
 ;;{   
 ;;    :email tony@hawk.cool
 ;;    :email-verified false
@@ -163,7 +164,7 @@ The admin api only allows the creating of users using the email/password sign-in
 ;;    :disabled false
 ;;}
 
-(charm/set-user-phone-number "vMnMJvS28kWr5pb6sByHULMLelJ3" "0800123123")  
+(charm-admin/set-user-phone-number "vMnMJvS28kWr5pb6sByHULMLelJ3" "0800123123")  
 ;;{   
 ;;    :email tony@hawk.cool
 ;;    :email-verified false
@@ -175,7 +176,7 @@ The admin api only allows the creating of users using the email/password sign-in
 ;;    :disabled false
 ;;}
 
-(charm/set-user-display-name "vMnMJvS28kWr5pb6sByHULMLelJ3" "Tony Hawk")  
+(charm-admin/set-user-display-name "vMnMJvS28kWr5pb6sByHULMLelJ3" "Tony Hawk")  
 ;;{   
 ;;    :email tony@hawk.cool
 ;;    :email-verified false
@@ -187,7 +188,7 @@ The admin api only allows the creating of users using the email/password sign-in
 ;;    :disabled false
 ;;}
 
-(charm/set-user-photo-url "vMnMJvS28kWr5pb6sByHULMLelJ3" "https://en.wikipedia.org/wiki/Tony_Hawk#/media/File:Skater_Tony_Hawk.jpg")  
+(charm-admin/set-user-photo-url "vMnMJvS28kWr5pb6sByHULMLelJ3" "https://en.wikipedia.org/wiki/Tony_Hawk#/media/File:Skater_Tony_Hawk.jpg")  
 ;;{   
 ;;    :email tony@hawk.cool
 ;;    :email-verified false
