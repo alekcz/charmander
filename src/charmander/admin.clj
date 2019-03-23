@@ -39,7 +39,7 @@
 
 ; public methods
 
-(defn init [key-file-json database-name]
+(defn init-admin [key-file-json database-name]
   (let [options (build-firebase-options key-file-json database-name)]
     (. FirebaseApp initializeApp options)))
 
@@ -78,7 +78,7 @@
   (let [firebase-auth (. FirebaseAuth getInstance)
         update-request (new UserRecord$UpdateRequest uuid)]
     (try
-      (convert-user-record-to-map (. firebase-auth updateUser (doto update-request (.setEmail email))))
+      (convert-user-record-to-map (. firebase-auth updateUser (doto update-request (.setEmail email) (.setEmailVerified false))))
       (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
 
 (defn set-user-password [uuid password]

@@ -25,10 +25,25 @@ A clojure library to make working with firebase easier
 
 ```
 
+## API
+- Token API
+  * `validate-token`
+- Admin API
+  * `init`
+  * `create-user`
+  * `delete-user`
+  * `get-user`
+  * `get-user-by-email`
+  * `get-user-by-phone-number`
+  * `set-user-email`
+  * `set-user-password`
+  * `set-user-phone-number`
+  * `set-user-display-name`
+  * `set-user-photo-url`
 
 ### Validating tokens
 
-Validates firebase tokens. 
+Validates firebase tokens. Validating tokens doesn't require an admin or service account.
 
 ```clojure
 
@@ -61,6 +76,128 @@ Validates firebase tokens.
 ;;}
 
 ```
+
+## Admin 
+
+Manages user data and authentication using your firebase admin or service account credentials using the email/password sign-in provider.   
+At the moment only one firebase app can be used at a time.   
+
+### Initializing your admin account
+
+1. Get the `json` file containing your creditials by following the instruction here [https://firebase.google.com/docs/admin/setup](https://firebase.google.com/docs/admin/setup)  
+
+2. To use email and password login enable the email/password sign-in provider.
+![Screenshot of enabled email/password login](activate-email-login?raw=true "Authentication Dashboard")
+
+3. initialize the admin functions in `charmander`
+
+```clojure
+(charm/init-admin "/path/to/firebase/key.json" "database-name")  ;; you may need to create a database first
+```
+
+### Managing user accounts
+The admin api only allows the creating of users using the email/password sign-in provider.
+
+```clojure
+
+(charm/create-user "email@domain.com" "superstrong6characterpassword")  
+;;{   
+;;    :email email@domain.com
+;;    :email-verified false
+;;    :uid vMnMJvS28kWr5pb6sByHULMLelJ3
+;;    :provider-id firebase
+;;    :photo-url nil
+;;    :phone-number nil
+;;    :display-name nil
+;;    :disabled false
+;;}
+
+(charm/get-user "vMnMJvS28kWr5pb6sByHULMLelJ3")  
+;;{   
+;;    :email email@domain.com
+;;    :email-verified true
+;;    :uid vMnMJvS28kWr5pb6sByHULMLelJ3
+;;    :provider-id firebase
+;;    :photo-url https://avatars0.githubusercontent.com/u/11717556?s=460&v=4
+;;    :phone-number nil
+;;    :display-name emailer
+;;    :disabled false
+;;}
+
+(charm/get-user-by-email "email@domain.com")  
+;;{   
+;;    :email email@domain.com
+;;    :email-verified true
+;;    :uid vMnMJvS28kWr5pb6sByHULMLelJ3
+;;    :provider-id firebase
+;;    :photo-url https://avatars0.githubusercontent.com/u/11717556?s=460&v=4
+;;    :phone-number nil
+;;    :display-name emailer
+;;    :disabled false
+;;}
+
+(charm/set-user-email "vMnMJvS28kWr5pb6sByHULMLelJ3" "tony@hawk.cool")  
+;;{   
+;;    :email tony@hawk.cool
+;;    :email-verified false
+;;    :uid vMnMJvS28kWr5pb6sByHULMLelJ3
+;;    :provider-id firebase
+;;    :photo-url https://avatars0.githubusercontent.com/u/11717556?s=460&v=4
+;;    :phone-number nil
+;;    :display-name emailer
+;;    :disabled false
+;;}
+
+(charm/set-user-password "vMnMJvS28kWr5pb6sByHULMLelJ3" "5tr0ngp455w0rd")  
+;;{   
+;;    :email tony@hawk.cool
+;;    :email-verified false
+;;    :uid vMnMJvS28kWr5pb6sByHULMLelJ3
+;;    :provider-id firebase
+;;    :photo-url https://avatars0.githubusercontent.com/u/11717556?s=460&v=4
+;;    :phone-number nil
+;;    :display-name emailer
+;;    :disabled false
+;;}
+
+(charm/set-user-phone-number "vMnMJvS28kWr5pb6sByHULMLelJ3" "0800123123")  
+;;{   
+;;    :email tony@hawk.cool
+;;    :email-verified false
+;;    :uid vMnMJvS28kWr5pb6sByHULMLelJ3
+;;    :provider-id firebase
+;;    :photo-url https://avatars0.githubusercontent.com/u/11717556?s=460&v=4
+;;    :phone-number 0800123123
+;;    :display-name emailer
+;;    :disabled false
+;;}
+
+(charm/set-user-display-name "vMnMJvS28kWr5pb6sByHULMLelJ3" "Tony Hawk")  
+;;{   
+;;    :email tony@hawk.cool
+;;    :email-verified false
+;;    :uid vMnMJvS28kWr5pb6sByHULMLelJ3
+;;    :provider-id firebase
+;;    :photo-url https://avatars0.githubusercontent.com/u/11717556?s=460&v=4
+;;    :phone-number nil
+;;    :display-name Tony Hawk
+;;    :disabled false
+;;}
+
+(charm/set-user-photo-url "vMnMJvS28kWr5pb6sByHULMLelJ3" "https://en.wikipedia.org/wiki/Tony_Hawk#/media/File:Skater_Tony_Hawk.jpg")  
+;;{   
+;;    :email tony@hawk.cool
+;;    :email-verified false
+;;    :uid vMnMJvS28kWr5pb6sByHULMLelJ3
+;;    :provider-id firebase
+;;    :photo-url https://en.wikipedia.org/wiki/Tony_Hawk#/media/File:Skater_Tony_Hawk.jpg
+;;    :phone-number nil
+;;    :display-name Tony Hawk
+;;    :disabled false
+;;}
+
+```
+
 ## Next steps
 
 - Increase efficiency
@@ -69,7 +206,7 @@ Validates firebase tokens.
 
 ## License
 
-Copyright © 2017 Alexander Oloo
+Copyright © 2019 Alexander Oloo
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.

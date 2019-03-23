@@ -28,3 +28,13 @@
 					(do
 						(is (= (. options getDatabaseUrl) "https://project_id.firebaseio.com"))
 						(is (= (type options) com.google.firebase.FirebaseOptions)))))))
+
+;(deftest test-validate-service-key)
+
+;(#'charmander.admin/init-admin "firebaseKey.json" "alekcz-dev")
+;(println (#'charmander.admin/delete-user "vMnMJvS28kWr5pb6sByHULMLelJ3"))
+;(println (#'charmander.admin/create-user "email@domain.com" "superDuperSecure"))
+;(println (#'charmander.admin/get-user "foHCpMoaT7P3WXeBTgWR261Z2mX2"))
+;(println (#'charmander.admin/get-user-by-email "email@domain.com"))
+;(println (#'charmander.admin/set-user-display-name "foHCpMoaT7P3WXeBTgWR261Z2mX2" "email"))
+;(println (#'charmander.admin/set-user-password "foHCpMoaT7P3WXeBTgWR261Z2mX2" "superDuperExtra53cur3"))
