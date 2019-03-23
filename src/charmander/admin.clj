@@ -27,7 +27,7 @@
         (.setEmailVerified false)
         (.setDisabled false))))
 
-(defn- convert-user-record-to-map [user-record]
+(defn- convert-user-record-to-map [^UserRecord user-record]
   { :email (. user-record getEmail)
     :email-verified (. user-record isEmailVerified)
     :uid (. user-record getUid)
@@ -39,9 +39,12 @@
 
 ; public methods
 
+; init admin api
 (defn init [key-file-json database-name]
   (let [options (build-firebase-options key-file-json database-name)]
     (. FirebaseApp initializeApp options)))
+
+; user management api
 
 (defn create-user [email password]
   (let [firebase-auth (. FirebaseAuth getInstance) 
@@ -109,4 +112,16 @@
       (convert-user-record-to-map (. firebase-auth updateUser (doto update-request (.setPhotoUrl photo-url))))
       (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
 
-        
+(defn generate-password-reset-link [email]
+  (let [firebase-auth (. FirebaseAuth getInstance)]
+    (try
+      (. firebase-auth generatePasswordResetLink email)
+      (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
+
+(defn generate-email-verification-link [email]
+  (let [firebase-auth (. FirebaseAuth getInstance)]
+    (try
+      (. firebase-auth generateEmailVerificationLink email)
+      (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
+
+

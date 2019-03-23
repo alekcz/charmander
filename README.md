@@ -17,7 +17,7 @@ A clojure library to make working with firebase easier
 
 ```clojure
 
-[alekcz/charmander "0.2.0"]
+[alekcz/charmander "0.3.0"]
 
 ;; In your ns statement:
 (ns my.ns
@@ -41,6 +41,8 @@ A clojure library to make working with firebase easier
   * `set-user-phone-number`
   * `set-user-display-name`
   * `set-user-photo-url`
+  * `generate-email-verification-link`
+  * `generate-password-reset-link`
 
 ### Validating tokens
 
@@ -198,6 +200,13 @@ The admin api only allows the creating of users using the email/password sign-in
 ;;    :display-name Tony Hawk
 ;;    :disabled false
 ;;}
+
+(charm-admin/generate-email-verification-link "tony@hawk.cool")  
+;; https://alekcz-dev.firebaseapp.com/__/auth/action?mode=verifyEmail&oobCode=d6uX0gzOuvnZLAwfk8HKxLYrRUCUaBnrzwDgFdzfDhgAAAFprFHVmQ&apiKey=AIzaSyBh5FtSYL_lGcqNgyWUv9TBp_QPFqv2d5w&lang=en
+
+
+(charm-admin/generate-password-reset-link "tony@hawk.cool")  
+;; https://alekcz-dev.firebaseapp.com/__/auth/action?mode=resetPassword&oobCode=viRcZqjCqxN6eYYmkQGY2fCZjU4RDKuNhysok83ghSEAAAFprFVwJg&apiKey=AIzaSyBh5FtSYL_lGcqNgyWUv9TBp_QPFqv2d5w&lang=en
 
 ```
 
