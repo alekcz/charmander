@@ -17,7 +17,7 @@ A clojure library to make working with firebase easier
 
 ```clojure
 
-[alekcz/charmander "0.1.0"]
+[alekcz/charmander "0.2.0"]
 
 ;; In your ns statement:
 (ns my.ns
@@ -90,7 +90,7 @@ The Admin API is based on the Java Firebase Admin SDK v6.8.0
 1. Get the `json` file containing your creditials by following the instruction here [https://firebase.google.com/docs/admin/setup](https://firebase.google.com/docs/admin/setup)  
 
 2. To use email and password login enable the email/password sign-in provider.
-![Screenshot of enabled email/password login](activate-email-login?raw=true "Authentication Dashboard")
+![Screenshot of enabled email/password login](activate-email-login.png?raw=true "Authentication Dashboard")
 
 3. initialize the admin functions in `charmander`
 
