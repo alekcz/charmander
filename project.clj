@@ -11,4 +11,6 @@
                   [base64-clj "0.1.1"]
                   [overtone/at-at "1.2.0"]
                   [com.google.auth/google-auth-library-oauth2-http "0.13.0"]
-                  [com.google.firebase/firebase-admin "6.8.0"  :exclusions [io.grpc/grpc-core]]])
+                  [com.google.firebase/firebase-admin "6.8.0"  :exclusions [io.grpc/grpc-core]]
+                  [com.taoensso/nippy "2.14.0"] 
+                  [metosin/jsonista "0.2.2"]])

@@ -10,3 +10,6 @@ pom.xml.asc
 .hgignore
 .hg/
 /*.json
+/*.txt
+.DS_Store
+**/.DS_Store
