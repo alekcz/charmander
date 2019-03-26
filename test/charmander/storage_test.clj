@@ -36,13 +36,8 @@
 
 (#'charmander.admin/init "firebaseKey.json" "alekcz-dev")
 (def stor (#'charmander.storage/attach-storage "/charmander"))
-(def conni  (d/create-conn {}))
-(d/transact! conni [ { :db/id -1
-                        :name  "Maksim"
-                        :age   45
-                        :aka   ["Max Otto von Stierlitz", "Jack Ryan"] } ])
 
-(#'charmander.storage/write-data stor conni)
+;(#'charmander.storage/write-data stor conni)
 ;(. storage-ref setValueAsync (pr-str db))
 
-(Thread/sleep 30000)
+(Thread/sleep 60000)

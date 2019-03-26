@@ -12,39 +12,41 @@
 	(:gen-class))
 
 (defn read-db [ser] (clojure.edn/read-string {:readers datascript.core/data-readers} ser))
-(def conn (d/create-conn {}))
+(def connection (d/create-conn {}))
 (def serialized-db (atom ""))
+(def ready(atom false))
 
 ; private methods
 
-
-;;(defn- refresh-db [serialized-data]
-;;   (d/reset-conn! conn )
-
-(defn- get-storage-instance [path] 
+(defn- storage-instance [path] 
   (-> (FirebaseDatabase/getInstance) ;use thread-first when the final part of the function will return value to be used
       (.getReference path)))
 
-; Add watch to serialized-db
-
-(add-watch serialized-db :watcher
-  (fn [key atom old-state new-state]
-    (do 
-      (d/reset-conn! conn (read-db new-state))
-      (println new-state))))
-
+(defn- write-data [storage-ref db]
+  (. storage-ref setValueAsync (pr-str @db)))
 
 ; public methods
 
+(defn conn [] connection)
+(defn conn? [] (and connection @ready))
+
 (defn attach-storage [path]
-  (let [storage-instance (get-storage-instance path)]
+  (let [stor (storage-instance path)]
     
-    (let [p (fn [^String data] (reset! serialized-db data))
-          listener (. storage-instance addValueEventListener 
+    (let [p (fn [^String data] 
+              (do 
+                (reset! serialized-db data)
+                (reset! ready true)))
+          listener (. stor addValueEventListener 
                       (reify ValueEventListener
                         (onDataChange [this data-snapshot] 
                          (p (. data-snapshot getValue)))))]
-                         storage-instance)))
+                         (do 
+                            (add-watch connection :database-watcher
+                              (fn [key atom old-state new-state]
+                                (if @ready (. stor setValueAsync (pr-str new-state)))))
+                            (add-watch serialized-db :serialization-watcher
+                              (fn [key atom old-state new-state]
+                                  (d/reset-conn! connection (read-db new-state))))
+                            stor))))
 
-(defn write-data [storage-ref db]
-  (. storage-ref setValueAsync (pr-str @db)))
