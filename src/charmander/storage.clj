@@ -22,9 +22,6 @@
   (-> (FirebaseDatabase/getInstance) ;use thread-first when the final part of the function will return value to be used
       (.getReference path)))
 
-(defn- write-data [storage-ref db]
-  (. storage-ref setValueAsync (pr-str @db)))
-
 ; public methods
 
 (defn conn [] connection)
@@ -35,6 +32,7 @@
     
     (let [p (fn [^String data] 
               (do 
+                (print data)
                 (reset! serialized-db data)
                 (reset! ready true)))
           listener (. stor addValueEventListener 
@@ -45,8 +43,8 @@
                             (add-watch connection :database-watcher
                               (fn [key atom old-state new-state]
                                 (if @ready (. stor setValueAsync (pr-str new-state)))))
-                            (add-watch serialized-db :serialization-watcher
-                              (fn [key atom old-state new-state]
-                                  (d/reset-conn! connection (read-db new-state))))
+                             (add-watch serialized-db :serialization-watcher
+                               (fn [key atom old-state new-state]
+                                   (d/reset-conn! connection (read-db new-state))))
                             stor))))
 

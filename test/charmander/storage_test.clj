@@ -27,9 +27,9 @@
 
 ; Tests for interacting with firestore
 
-(deftest test-get-storage-instance
+(deftest test-storage-instance
 		(testing "Retrieving the storage instance"
-			(let [storage-ref (#'charmander.storage/get-storage-instance "/")]
+			(let [storage-ref (#'charmander.storage/storage-instance "/")]
 				(do
 					(is (= (type storage-ref) com.google.firebase.database.DatabaseReference))))))
 
@@ -37,7 +37,12 @@
 (#'charmander.admin/init "firebaseKey.json" "alekcz-dev")
 (def stor (#'charmander.storage/attach-storage "/charmander"))
 
-;(#'charmander.storage/write-data stor conni)
+(Thread/sleep 10000)
+; (d/transact! (#'charmander.storage/conn) [ { :db/id -1
+;                         :name  "Maksim"
+;                         :age   45
+;                         :aka   ["Max Otto von Stierlitz", "Jack Ryan"] } ])
+(println (#'charmander.storage/conn))
 ;(. storage-ref setValueAsync (pr-str db))
 
-(Thread/sleep 60000)
+(Thread/sleep 50000)
