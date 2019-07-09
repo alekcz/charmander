@@ -8,8 +8,31 @@
             com.google.firebase.auth.FirebaseAuthException
             com.google.firebase.auth.UserRecord
             com.google.firebase.auth.UserRecord$CreateRequest
-            com.google.firebase.auth.UserRecord$UpdateRequest)
+            com.google.firebase.auth.UserRecord$UpdateRequest
+            ;firestore
+            com.google.firebase.cloud.FirestoreClient
+            com.google.cloud.firestore.QueryDocumentSnapshot
+            com.google.cloud.firestore.QuerySnapshot
+            com.google.cloud.firestore.DocumentReference
+            com.google.cloud.firestore.DocumentSnapshot
+            com.google.cloud.firestore.WriteResult
+            com.google.api.core.ApiFuture
+            com.google.cloud.firestore.CollectionReference)
   (:gen-class))
+
+(defn- keywordize-keys
+  "Recursively transforms all map keys from strings to keywords."
+  [m]
+  (let [f (fn [[k v]] (if (string? k) [(keyword k) v] [k v]))]
+    (clojure.walk/postwalk (fn [x] (if (map? x) (into {} (map f x)) x)) m)))    
+
+(defn- stringify-keys
+  "Recursively transforms all map keys from keywords to strings."
+  [m]
+  (let [f (fn [[k v]] (if (keyword? k) [(name k) v] [k v]))]
+    (clojure.walk/postwalk (fn [x] (if (map? x) (into {} (map f x)) x)) m)))  
+
+;(def firestore (atom nil))
 
 ; private methods
 
@@ -125,3 +148,47 @@
       (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
 
 
+; firestore api
+
+(defn snapshot-to-map [snapshot]
+  (keywordize-keys (into {} (. snapshot getData))))
+
+(defn- process-document [reff]
+   (let [futuristic (cast ApiFuture (. reff get))]
+        (let [query-snapshot (. futuristic get)]
+          (. query-snapshot getDocuments))))
+
+(defn- process-document-collection [firestore-collection]
+    (let [collection-list (. firestore-collection getCollections)]
+      (for [x collection-list] 
+        (assoc {} 
+          :id (. x getId) 
+          :path (. x getPath) 
+          :data (for [y (process-document x)]
+                  (assoc {} 
+                    :id (. y getId) 
+                    :data (snapshot-to-map y)))))))
+        
+(defn get-collection [collection]
+  (let [firestore (FirestoreClient/getFirestore)] 
+    (let [reff (cast CollectionReference (-> firestore (.collection collection)))]
+      (let [futuristic (cast ApiFuture (. reff get))]
+        (let [firestore-collection (. futuristic get)]
+            (let [collection-list (. firestore-collection getDocuments)]
+              (for [x collection-list] 
+                (assoc {} 
+                  :id (. x getId) 
+                  :data (snapshot-to-map x)) )))))))
+
+(defn get-document [collection document]
+  (let [firestore (FirestoreClient/getFirestore)] 
+    (let [reff (cast DocumentReference (-> firestore (.collection collection) (.document document)))]
+      (let [futuristic (cast ApiFuture (. reff get))]
+        (let [document-snapshot (cast DocumentSnapshot (. futuristic get))]
+          (if (. document-snapshot exists) 
+            (let [object (snapshot-to-map document-snapshot)]
+              (assoc {}
+              :id (. document-snapshot getId) 
+              :data (assoc object :subcollections (process-document-collection reff))))
+            nil))))))
+          

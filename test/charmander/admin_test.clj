@@ -1,6 +1,7 @@
 (ns charmander.admin-test
   (:require [clojure.test :refer :all]
   					[clojure.string :as str]
+						[clojure.pprint :as pp]
   				  [charmander.admin :refer :all])
 	(:import 	com.google.auth.oauth2.GoogleCredentials
 						com.google.firebase.FirebaseApp
@@ -32,6 +33,8 @@
 ;(deftest test-validate-service-key)
 
 ;(#'charmander.admin/init "firebaseKey.json" "alekcz-dev")
+;(pp/pprint (#'charmander.admin/get-document "coolguy" "W14kYhKoSrbcoPSUWIw0"))
+;(pp/pprint (#'charmander.admin/get-collection "coolguy/W14kYhKoSrbcoPSUWIw0/jitsus"))
 ;(println (#'charmander.admin/delete-user "vMnMJvS28kWr5pb6sByHULMLelJ3"))
 ;(println (#'charmander.admin/create-user "email@domain.com" "superDuperSecure"))
 ;(println (#'charmander.admin/get-user "foHCpMoaT7P3WXeBTgWR261Z2mX2"))
