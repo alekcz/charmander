@@ -97,11 +97,11 @@
 ; public methods
 
 ; init admin api
-(defn init [key-file-json database-name]
+(defn init []
   (try
     (. FirebaseAuth getInstance) 
   (catch IllegalStateException ise
-    (let [options (build-firebase-options key-file-json database-name)]
+    (let [options (build-firebase-options)]
       (. FirebaseApp initializeApp options)))))
 
 ; user management api

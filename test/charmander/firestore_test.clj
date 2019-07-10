@@ -22,13 +22,13 @@
 
 ; Tests for the Admin SDK
 
-(deftest test-build-firebase-options
-		(testing "Testing Firebase Options Builder"
-			(let [file "resources/test/test-key.json" database-name "project_id"]
-				(let [options (#'charmander.admin/build-firebase-options file database-name)]
-					(do
-						(is (= (. options getDatabaseUrl) "https://project_id.firebaseio.com"))
-						(is (= (type options) com.google.firebase.FirebaseOptions)))))))
+; (deftest test-build-firebase-options
+; 		(testing "Testing Firebase Options Builder"
+; 			(let [file "resources/test/test-key.json" database-name "project_id"]
+; 				(let [options (#'charmander.admin/build-firebase-options file database-name)]
+; 					(do
+; 						(is (= (. options getDatabaseUrl) "https://project_id.firebaseio.com"))
+; 						(is (= (type options) com.google.firebase.FirebaseOptions)))))))
 
 ;(deftest test-validate-service-key)
 
