@@ -1,5 +1,6 @@
 (ns charmander.admin
-  (:require [clojure.java.io :as io])
+  (:require [clojure.java.io :as io]
+            [environ.core :refer [env]])
   (:import 	com.google.auth.oauth2.GoogleCredentials
             com.google.firebase.FirebaseApp
             com.google.firebase.FirebaseOptions
@@ -37,10 +38,16 @@
 
 ; private methods
 
-(defn- build-firebase-options [key-file-json database-name] 
+(defn- string->stream
+  ([s] (string->stream s "UTF-8"))
+  ([s encoding]
+   (-> s
+       (.getBytes encoding)
+       (java.io.ByteArrayInputStream.))))
+
+(defn- build-firebase-options [] 
   (-> (new FirebaseOptions$Builder) ;use thread-first when the final part of the function will return value to be used
-      (.setCredentials (GoogleCredentials/fromStream (io/input-stream key-file-json))) 
-      (.setDatabaseUrl (str "https://" database-name ".firebaseio.com"))
+      (.setCredentials (GoogleCredentials/fromStream (string->stream (env :firebase-service-key))));(io/input-stream key-file-json))) 
       (.build)))
 
 (defn- build-create-user-request [email password] 
