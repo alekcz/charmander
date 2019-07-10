@@ -1,8 +1,8 @@
-(ns charmander.admin-test
+(ns charmander.firestore-test
   (:require [clojure.test :refer :all]
   					[clojure.string :as str]
 						[clojure.pprint :as pp]
-  				  [charmander.admin :refer :all])
+  				  [charmander.firestore :refer :all])
 	(:import 	com.google.auth.oauth2.GoogleCredentials
 						com.google.firebase.FirebaseApp
 						com.google.firebase.FirebaseOptions
@@ -32,12 +32,14 @@
 
 ;(deftest test-validate-service-key)
 
-(#'charmander.admin/init "firebaseKey.json" "alekcz-dev")
-;(println (#'charmander.admin/delete-user "vMnMJvS28kWr5pb6sByHULMLelJ3"))
-;(println (#'charmander.admin/create-user "email@domain.com" "superDuperSecure"))
-;(println (#'charmander.admin/get-user "foHCpMoaT7P3WXeBTgWR261Z2mX2"))
-;(println (#'charmander.admin/get-user-by-email "email@domain.com"))
-;(println (#'charmander.admin/set-user-display-name "foHCpMoaT7P3WXeBTgWR261Z2mX2" "email"))
-;(println (#'charmander.admin/set-user-password "foHCpMoaT7P3WXeBTgWR261Z2mX2" "superDuperExtra53cur3"))
-;(println (#'charmander.admin/generate-email-verification-link "email@domain.com"))
-;(println (#'charmander.admin/generate-password-reset-link "email@domain.com"))
+;(#'charmander.admin/init "firebaseKey.json" "alekcz-dev")
+;(#'charmander.firestore/create-document "collection" "document" {:name "Document"})
+;(#'charmander.firestore/add-document-to-collection "collectionor/document/subcollection" {:name "Subdocument"})
+
+;(pp/pprint (#'charmander.admin/get-document "collection" "document"))
+;(pp/pprint (#'charmander.admin/get-document-and-subcollections "collection" "document"))
+;(pp/pprint (#'charmander.admin/get-collection "collection/document/subcollection"))
+
+;(#'charmander.admin/set-document "collection" "document" {:namek "Document"})
+;(#'charmander.admin/update-document "collection" "document" {:namek "Documenty" :name "Document"})
+;(#'charmander.admin/delete-document "collection" "document")

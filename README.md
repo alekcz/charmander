@@ -29,6 +29,7 @@ A clojure library to make working with firebase easier
 ## API
 - Token API
   * `validate-token`
+
 - Admin API
   * `init`
   * `create-user`
@@ -43,6 +44,20 @@ A clojure library to make working with firebase easier
   * `set-user-photo-url`
   * `generate-email-verification-link`
   * `generate-password-reset-link`
+
+- Firestore API
+  * `create-user`
+  * `delete-user`
+  * `get-user`
+  * `get-user-by-email`
+  * `get-user-by-phone-number`
+  * `set-user-email`
+  * `set-user-password`
+  * `set-user-phone-number`
+  * `set-user-display-name`
+  * `set-user-photo-url`
+  * `generate-email-verification-link`
+  * `generate-password-reset-link`  
 
 ### Validating tokens
 
@@ -208,6 +223,59 @@ The admin api only allows the creating of users using the email/password sign-in
 (charm-admin/generate-password-reset-link "tony@hawk.cool")  
 ;; https://alekcz-dev.firebaseapp.com/__/auth/action?mode=resetPassword&oobCode=viRcZqjCqxN6eYYmkQGY2fCZjU4RDKuNhysok83ghSEAAAFprFVwJg&apiKey=AIzaSyBh5FtSYL_lGcqNgyWUv9TBp_QPFqv2d5w&lang=en
 
+```
+
+### Working with the Firestore
+The firestore api only allows CRUD operation on Firestore through 
+
+```clojure
+
+(charm-firestore/create-document "collection" "document" {:field1 "field1" :field2 "field2"})  
+;;nil
+
+(charm-firestore/add-document-to-collection "path/to/collection" {:field1 "field1" :field2 "field2"})  
+;;nil
+
+(charm-firestore/get-document "path/to/collection" "document")  
+;;  { :id "document",
+;;    :data {
+;;          :name "Document",
+;;          :subcollections
+;;           ({:id "subcollection1", :path "collection/document/subcollection1"}
+;;            {:id "subcollection2", :path "collection/document/subcollection2"}
+;;            {:id "subcollection3", :path "collection/document/subcollection2"})
+;;     }
+;;  }
+
+(charm-firestore/get-document-and-subcollections "path/to/collection" "document")  
+;;  { :id "document",
+;;    :data {
+;;          :name "Document",
+;;          :subcollections
+;;           ({:id "subcollection1", 
+;;             :path "collection/document/subcollection1"
+;;             :data ({:id "9AMN2yNG3J9GvtTPMxxy", :data {:name "SubdocumentA"}})}
+;;            {:id "subcollection2", 
+;;             :path "collection/document/subcollection1"
+;;             :data ({:id "6223N2yNG3J9GvtTPMxxy", :data {:name "SubdocumentB"}})})
+;;             
+;;     }
+;;  }
+
+(charm-firestore/get-collection "path/to/collection")  
+;;     ({:id "collectionA", 
+;;       :path "collection/document/collectionA"
+;;       :data ({:id "6223N2yNG3J9GvtTPMxxy", :data {:name "SubdocumentP"}}
+;;              {:id "6223N2yNG3J9GvtTPMxxy", :data {:name "SubdocumentQ"}}))})
+
+(charm-firestore/set-document "path/to/document-to-be-overwritten" {:field1 "field1" :field2 "field2"})  
+;;nil
+
+(charm-firestore/update-document "path/to/document-to-be-updated" {:field1 "field1" :field2 "field2"})  
+;;nil
+
+(charm-firestore/delete-document "path/to/document-to-be-delete")  
+;;nil
 ```
 
 ## Next steps

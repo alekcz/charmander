@@ -1,4 +1,4 @@
-(defproject alekcz/charmander "0.3.0"
+(defproject alekcz/charmander "0.4.0-alpha"
   :description "Charmander: a set of libraries to make working with firebase easier in clojure"
   :url "https://github.com/alekcz/charmander"
   :license {:name "Eclipse Public License"
@@ -11,4 +11,4 @@
                   [base64-clj "0.1.1"]
                   [overtone/at-at "1.2.0"]
                   [com.google.auth/google-auth-library-oauth2-http "0.13.0"]
-                  [com.google.firebase/firebase-admin "6.8.0"]])
+                  [com.google.firebase/firebase-admin "6.8.1"]])
