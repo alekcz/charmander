@@ -12,4 +12,5 @@
                   [overtone/at-at "1.2.0"]
                   [com.google.auth/google-auth-library-oauth2-http "0.13.0"]
                   [com.google.firebase/firebase-admin "6.8.1"]
-                  [environ "1.1.0"]])
+                  [environ "1.1.0"]
+                  [danlentz/clj-uuid "0.1.9"]])

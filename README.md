@@ -109,10 +109,14 @@ The Admin API is based on the Java Firebase Admin SDK v6.8.0
 
 2. Enable the email/password sign-in provider.
 
-3. initialize the admin functions in `charmander`
+3. Set the GOOGLE_CLOUD_PROJECT environment to the id of your project
+
+4. Set the FIREBASE_CONFIG environment variable to the contents of your `json` key file
+
+4. initialize the admin functions in `charmander`
 
 ```clojure
-(charm-admin/init "/path/to/firebase/key.json" "database-name")  ;; you may need to create a database first
+(charm-admin/init)  ;; you may need to create a database first
 ```
 
 ### Managing user accounts

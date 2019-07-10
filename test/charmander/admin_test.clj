@@ -2,6 +2,8 @@
   (:require [clojure.test :refer :all]
   					[clojure.string :as str]
 						[clojure.pprint :as pp]
+						[environ.core :refer [env]]
+						[clj-uuid :as uuid]
   				  [charmander.admin :refer :all])
 	(:import 	com.google.auth.oauth2.GoogleCredentials
 						com.google.firebase.FirebaseApp
@@ -20,20 +22,38 @@
 					(is (= 1 (- 2 1)))))))
 )
 
+;Initialise Auth to Firebase
+(#'charmander.admin/init)
+
 ; Tests for the Admin SDK
 
-; (deftest test-build-firebase-options
-; 		(testing "Testing Firebase Options Builder"
-; 			(let [file "resources/test/test-key.json" database-name "project_id"]
-; 				(let [options (#'charmander.admin/build-firebase-options file database-name)]
-; 					(do
-; 						(is (= (. options getDatabaseUrl) "https://project_id.firebaseio.com"))
-; 						(is (= (type options) com.google.firebase.FirebaseOptions)))))))
+(deftest test-create-user
+	(testing "Testing the creating  ofnew users"
+			(let [unique (str (uuid/v1))]
+				(let [response  (#'charmander.admin/create-user (str unique "@domain.com") "superDuperSecure")
+							response2 (#'charmander.admin/create-user (str unique "@domain.com") "superDuperSecure")]
+					(do
+						(is (= (:email response) (str unique "@domain.com"))) 
+						(is (= response2 {:error true, :error-code "email-already-exists"})) 
+						(is (not (= response response2)))
+						(#'charmander.admin/delete-user (:uid response)))))))
+						
+(deftest test-all-get-users
+	(testing "Testing the retrieval of user by uid or by email"
+			(let [unique (str (uuid/v1))]
+				(let [response (#'charmander.admin/create-user (str unique "@domain.com") "superDuperSecure")]
+					(do
+						(is (= (#'charmander.admin/get-user (:uid response)) response))
+						(is (= (#'charmander.admin/get-user-by-email (:email response)) response))
+						(is (= (#'charmander.admin/get-user-by-email (:email response)) (#'charmander.admin/get-user (:uid response))))
+						(#'charmander.admin/delete-user (:uid response)))))))
+
 
 ;(deftest test-validate-service-key)
 
 (#'charmander.admin/init)
-;(println (#'charmander.admin/delete-user "vMnMJvS28kWr5pb6sByHULMLelJ3"))
+;(println (env :firebase-service-key))
+;(println (#'charmander.admin/delete-user "nHdBq5wEu3WOEd3IfjLiaouXkr03"))
 ;(println (#'charmander.admin/create-user "email@domain.com" "superDuperSecure"))
 ;(println (#'charmander.admin/get-user "foHCpMoaT7P3WXeBTgWR261Z2mX2"))
 ;(println (#'charmander.admin/get-user-by-email "email@domain.com"))

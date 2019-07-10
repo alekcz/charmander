@@ -47,7 +47,7 @@
 
 (defn- build-firebase-options [] 
   (-> (new FirebaseOptions$Builder) ;use thread-first when the final part of the function will return value to be used
-      (.setCredentials (GoogleCredentials/fromStream (string->stream (env :firebase-service-key))));(io/input-stream key-file-json))) 
+      (.setCredentials (GoogleCredentials/fromStream (string->stream (env :firebase-config))));(io/input-stream key-file-json))) 
       (.build)))
 
 (defn- build-create-user-request [email password] 
