@@ -2,6 +2,7 @@
   (:require [clojure.test :refer :all]
   					[clojure.string :as str]
 						[clojure.pprint :as pp]
+						[clj-uuid :as uuid]
   				  [charmander.firestore :refer :all])
 	(:import 	com.google.auth.oauth2.GoogleCredentials
 						com.google.firebase.FirebaseApp
@@ -20,26 +21,32 @@
 					(is (= 1 (- 2 1)))))))
 )
 
-; Tests for the Admin SDK
+;Initialise Firebase Admin
+(#'charmander.admin/init)
 
-; (deftest test-build-firebase-options
-; 		(testing "Testing Firebase Options Builder"
-; 			(let [file "resources/test/test-key.json" database-name "project_id"]
-; 				(let [options (#'charmander.admin/build-firebase-options file database-name)]
-; 					(do
-; 						(is (= (. options getDatabaseUrl) "https://project_id.firebaseio.com"))
-; 						(is (= (type options) com.google.firebase.FirebaseOptions)))))))
+; Tests for the Firestore SDK
 
-;(deftest test-validate-service-key)
+(deftest test-create-and-read-document
+		(testing "Testing create and reading documents in Firestore"
+			(let [unique1 (str (uuid/v1)) unique2 (str (uuid/v1))]
+				(do
+					(#'charmander.firestore/create-document unique1 unique2 {:name "Document"})
+					(let [docu (#'charmander.firestore/get-document unique1 unique2)]
+						(is (= (:id docu) unique2))
+						(is (= (-> docu :data :name) "Document"))
+						(is (= (:names docu) nil))
+						(is (= (contains? docu :id) true))
+						(is (= (contains? docu :data) true)))
+						(#'charmander.firestore/delete-document unique1 unique2)))))
+						
 
-;(#'charmander.admin/init "firebaseKey.json" "alekcz-dev")
 ;(#'charmander.firestore/create-document "collection" "document" {:name "Document"})
 ;(#'charmander.firestore/add-document-to-collection "collectionor/document/subcollection" {:name "Subdocument"})
 
-;(pp/pprint (#'charmander.admin/get-document "collection" "document"))
-;(pp/pprint (#'charmander.admin/get-document-and-subcollections "collection" "document"))
-;(pp/pprint (#'charmander.admin/get-collection "collection/document/subcollection"))
+;(pp/pprint (#'charmander.firestore/get-document "collection" "document"))
+;(pp/pprint (#'charmander.firestore/get-document-and-subcollections "collection" "document"))
+;(pp/pprint (#'charmander.firestore/get-collection "collection/document/subcollection"))
 
-;(#'charmander.admin/set-document "collection" "document" {:namek "Document"})
-;(#'charmander.admin/update-document "collection" "document" {:namek "Documenty" :name "Document"})
-;(#'charmander.admin/delete-document "collection" "document")
+;(#'charmander.firestore/set-document "collection" "document" {:namek "Document"})
+;(#'charmander.firestore/update-document "collection" "document" {:namek "Documenty" :name "Document"})
+;(#'charmander.firestore/delete-document "collection" "document")

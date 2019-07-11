@@ -22,7 +22,7 @@
 					(is (= 1 (- 2 1)))))))
 )
 
-;Initialise Auth to Firebase
+;Initialise Firebase Admin
 (#'charmander.admin/init)
 
 ; Tests for the Admin SDK

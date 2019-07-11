@@ -22,7 +22,8 @@ A clojure library to make working with firebase easier
 ;; In your ns statement:
 (ns my.ns
   (:require [charmander.core :as charm]
-            [charmander.admin :as charm-admin]))
+            [charmander.admin :as charm-admin]
+            [charmander.firestore :as charm-firestore]))
 
 ```
 
@@ -46,19 +47,15 @@ A clojure library to make working with firebase easier
   * `generate-password-reset-link`
 
 - Firestore API
-  * `create-user`
-  * `delete-user`
-  * `get-user`
-  * `get-user-by-email`
-  * `get-user-by-phone-number`
-  * `set-user-email`
-  * `set-user-password`
-  * `set-user-phone-number`
-  * `set-user-display-name`
-  * `set-user-photo-url`
-  * `generate-email-verification-link`
-  * `generate-password-reset-link`  
-
+  * `create-document`
+  * `add-document-to-collection`
+  * `get-document`
+  * `get-document-and-subcollections`
+  * `get-collection`
+  * `set-document`
+  * `update-document`
+  * `delete-document`
+  
 ### Validating tokens
 
 Validates firebase tokens. Validating tokens doesn't require an admin or service account.
@@ -111,7 +108,7 @@ The Admin API is based on the Java Firebase Admin SDK v6.8.0
 
 3. Set the GOOGLE_CLOUD_PROJECT environment to the id of your project
 
-4. Set the FIREBASE_CONFIG environment variable to the contents of your `json` key file. Wrap the key contents in single quotes to escape all the special characters within it. e.g. FIREBASE_CONFIG='`contents-of-json`'
+4. Set the FIREBASE_CONFIG environment variable to the contents of your `json` key file. (Sometimes it may be necessary to wrap the key contents in single quotes to escape all the special characters within it. e.g. FIREBASE_CONFIG='`contents-of-json`')
 
 5. initialize the admin sdk in `charmander`
 
