@@ -48,10 +48,6 @@
 						(is (= (#'charmander.admin/get-user-by-email (:email response)) (#'charmander.admin/get-user (:uid response))))
 						(#'charmander.admin/delete-user (:uid response)))))))
 
-
-;(deftest test-validate-service-key)
-
-(#'charmander.admin/init)
 ;(println (env :firebase-service-key))
 ;(println (#'charmander.admin/delete-user "nHdBq5wEu3WOEd3IfjLiaouXkr03"))
 ;(println (#'charmander.admin/create-user "email@domain.com" "superDuperSecure"))

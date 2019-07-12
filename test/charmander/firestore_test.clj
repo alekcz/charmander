@@ -41,11 +41,18 @@
 						
 
 ;(#'charmander.firestore/create-document "collection" "document" {:name "Document"})
-;(#'charmander.firestore/add-document-to-collection "collectionor/document/subcollection" {:name "Subdocument"})
+; (#'charmander.firestore/add-document-to-collection "testing/document/subcollection" {:name "Subdocument"})
+; (#'charmander.firestore/add-document-to-collection "testing/document/subcollection" {:name "Subdocument2" :priority 1})
+; (#'charmander.firestore/add-document-to-collection "testing/document/subcollection" {:name "Subdocument3" :priority 1})
+; (#'charmander.firestore/add-document-to-collection "testing/document/subcollection" {:name "Subdocument4" :priority 2})
+; (#'charmander.firestore/add-document-to-collection "testing/document/subcollection" {:name "Subdocument2" :priority 3})
+; (#'charmander.firestore/add-document-to-collection "testing/document/subcollection" {:name "Subdocument3" :priority 3})
 
 ;(pp/pprint (#'charmander.firestore/get-document "collection" "document"))
 ;(pp/pprint (#'charmander.firestore/get-document-and-subcollections "collection" "document"))
-;(pp/pprint (#'charmander.firestore/get-collection "collection/document/subcollection"))
+(pp/pprint (#'charmander.firestore/query-collection "testing/document/subcollection"))
+(println "\n\n")
+(pp/pprint (#'charmander.firestore/query-collection "testing/document/subcollection" :property "priority" :value 3))
 
 ;(#'charmander.firestore/set-document "collection" "document" {:namek "Document"})
 ;(#'charmander.firestore/update-document "collection" "document" {:namek "Documenty" :name "Document"})

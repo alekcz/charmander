@@ -113,6 +113,20 @@
                   :id (. x getId) 
                   :data (snapshot-to-map x)) )))))))
 
+(defn query-collection [collection & {:keys [property value] :or {property nil value nil}}]
+  (if (nil? property)
+    (get-collection collection)   
+    (let [firestore (FirestoreClient/getFirestore)] 
+      (let [collref (cast CollectionReference (-> firestore (.collection collection)))]
+        (let [reff (-> collref (.whereEqualTo property value))]
+          (let [futuristic (cast ApiFuture (. reff get))]
+            (let [firestore-collection (. futuristic get)]
+                (let [collection-list (. firestore-collection getDocuments)]
+                  (for [x collection-list] 
+                    (assoc {} 
+                      :id (. x getId) 
+                      :data (snapshot-to-map x)) )))))))))
+
 (defn add-document-to-collection [collection data]
   (let [firestore (FirestoreClient/getFirestore)] 
     (let [reff (cast CollectionReference (-> firestore (.collection collection)))]
