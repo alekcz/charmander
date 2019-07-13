@@ -71,7 +71,7 @@
 
 (defn- resolve-write-future [api-future]
   (do 
-    (. api-future get)
+    (println (. (. api-future get) getUpdateTime))
     true))
           
 ; public methods

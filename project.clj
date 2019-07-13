@@ -23,4 +23,5 @@
                   [danlentz/clj-uuid "0.1.9"]]
                   
                   
-  :plugins [[lein-ancient "0.6.15"]])
+  :plugins [[lein-ancient "0.6.15"]
+            [lein-cloverage "1.1.1"]])
