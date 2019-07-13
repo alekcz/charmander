@@ -113,19 +113,47 @@
                   :id (. x getId) 
                   :data (snapshot-to-map x)) )))))))
 
-(defn query-collection [collection & {:keys [property value] :or {property nil value nil}}]
-  (if (nil? property)
-    (get-collection collection)   
-    (let [firestore (FirestoreClient/getFirestore)] 
-      (let [collref (cast CollectionReference (-> firestore (.collection collection)))]
-        (let [reff (-> collref (.whereEqualTo property value))]
-          (let [futuristic (cast ApiFuture (. reff get))]
-            (let [firestore-collection (. futuristic get)]
-                (let [collection-list (. firestore-collection getDocuments)]
-                  (for [x collection-list] 
-                    (assoc {} 
-                      :id (. x getId) 
-                      :data (snapshot-to-map x)) )))))))))
+(defn- query [collection-reference args]
+  (let [property (:where args)]
+    (cond 
+      (some? (:equals args)) ;==
+        (-> collection-reference (.whereEqualTo property (:equals args)))
+      (some? (:equal-to args)) ;==
+        (-> collection-reference (.whereEqualTo property (:equal-to args)))
+      (some? (:less-than args)) ;<
+        (-> collection-reference (.whereLessThan property (:less-than args)))
+      (some? (:greater-than args)) ;> 
+        (-> collection-reference (.whereGreaterThan property (:greater-than args)))
+      (some? (:less-than-or-equal-to args)) ;<=
+        (-> collection-reference (.whereLessThanOrEqualTo property (:less-than-or-equal-to args)))
+      (some? (:greater-than-or-equal-to args)) ;>=
+        (-> collection-reference (.whereGreaterThanOrEqualTo property (:greater-than-or-equal-to args)))
+      (and (some? (:between args)) (= (count (:between args)) 2))  ;a < x < b
+        (let [lower (first (:between args)) upper (second (:between args))]
+          (cond  
+            (true? (:include-upper args)) (-> collection-reference (.whereGreaterThan property lower) (.whereLessThanOrEqualTo property upper))
+            (true? (:include-lower args)) (-> collection-reference (.whereGreaterThanOrEqualTo property lower) (.whereLessThan property upper))
+            :else (-> collection-reference (.whereGreaterThan property lower) (.whereLessThan property upper))))
+      (and (some? (:from args)) (= (count (:from args)) 2) ) ;a <= x <= b
+        (let [lower (first (:from args)) upper (second (:from args))]
+          (-> collection-reference (.whereGreaterThanOrEqualTo property lower) (.whereLessThanOrEqualTo property upper)))
+      (some? (:contains args)) 
+        (-> collection-reference (.whereArrayContains property (:contains args))))))
+
+(defn query-collection [collection & args]
+  (let [arguments (apply hash-map args)]
+    (if (empty? (:where arguments))
+      (get-collection collection)    
+      (let [firestore (FirestoreClient/getFirestore)] 
+        (let [collref (cast CollectionReference (-> firestore (.collection collection)))]
+          (let [reff (query collref arguments)]
+            (let [futuristic (cast ApiFuture (. reff get))]
+              (let [firestore-collection (. futuristic get)]
+                  (let [collection-list (. firestore-collection getDocuments)]
+                    (for [x collection-list] 
+                      (assoc {} 
+                        :id (. x getId) 
+                        :data (snapshot-to-map x)) ))))))))))
 
 (defn add-document-to-collection [collection data]
   (let [firestore (FirestoreClient/getFirestore)] 
