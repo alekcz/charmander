@@ -1,4 +1,4 @@
-(defproject alekcz/charmander "0.5.1"
+(defproject alekcz/charmander "0.5.2"
   :description "Charmander: a set of libraries to make working with firebase easier in clojure"
   :url "https://github.com/alekcz/charmander"
   :license {:name "Eclipse Public License"

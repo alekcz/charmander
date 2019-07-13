@@ -107,7 +107,7 @@
 
 (deftest test-get-document-with-subcollections
 		(testing "Testing retrieving documents that has a subcollections"
-			(let [docu (#'charmander.firestore/get-document path "doc")]
+			(let [docu (#'charmander.firestore/get-document docpath "doc")]
 				(is (= (:id docu) "doc"))
 				(is (= (-> docu :data :name) "Charmander"))
 				(is (= (contains? docu :id) true))
