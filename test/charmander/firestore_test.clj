@@ -62,11 +62,46 @@
 					(let [docu (#'charmander.firestore/get-document unique1 unique2)]
 						(is (= (:id docu) unique2))
 						(is (= (-> docu :data :name) "Document"))
-						(is (= (:names docu) nil))
 						(is (= (contains? docu :id) true))
 						(is (= (contains? docu :data) true)))
 						(#'charmander.firestore/delete-document unique1 unique2)
-						(is (nil? (#'charmander.firestore/get-document unique1 unique2)))))))					
+						(is (nil? (#'charmander.firestore/get-document unique1 unique2)))))))	
+
+(deftest test-create-read-update-document
+		(testing "Testing create and reading documents in Firestore"
+			(let [unique1 (str (uuid/v1)) unique2 (str (uuid/v1))]
+				(do
+					(#'charmander.firestore/create-document unique1 unique2 {:name "Document"})
+					(let [docu (#'charmander.firestore/get-document unique1 unique2)]
+						(is (= (:id docu) unique2))
+						(is (= (-> docu :data :name) "Document"))
+						(is (= (contains? docu :id) true))
+						(is (= (contains? docu :data) true)))
+					(#'charmander.firestore/update-document unique1 unique2 {:namey "Document"})
+					(let [docu (#'charmander.firestore/get-document unique1 unique2)]
+						(is (= (:id docu) unique2))
+						(is (= (-> docu :data :namey) "Document"))
+						(is (= (-> docu :data :name) "Document"))
+						(#'charmander.firestore/delete-document unique1 unique2)
+						(is (nil? (#'charmander.firestore/get-document unique1 unique2))))))))	
+
+(deftest test-create-read-set-document
+		(testing "Testing create and reading documents in Firestore"
+			(let [unique1 (str (uuid/v1)) unique2 (str (uuid/v1))]
+				(do
+					(#'charmander.firestore/create-document unique1 unique2 {:name "Document"})
+					(let [docu (#'charmander.firestore/get-document unique1 unique2)]
+						(is (= (:id docu) unique2))
+						(is (= (-> docu :data :name) "Document"))
+						(is (= (contains? docu :id) true))
+						(is (= (contains? docu :data) true)))
+					(#'charmander.firestore/set-document unique1 unique2 {:namey "Document"})
+					(let [docu (#'charmander.firestore/get-document unique1 unique2)]
+						(is (= (:id docu) unique2))
+						(is (= (-> docu :data :namey) "Document"))
+						(is (= (-> docu :data :name) nil))
+						(#'charmander.firestore/delete-document unique1 unique2)
+						(is (nil? (#'charmander.firestore/get-document unique1 unique2))))))))
 
 (deftest test-query-no-params
 		(testing "Testing a query with no parameters"

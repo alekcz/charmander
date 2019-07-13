@@ -48,6 +48,17 @@
 						(is (= (#'charmander.admin/get-user-by-email (:email response)) (#'charmander.admin/get-user (:uid response))))
 						(#'charmander.admin/delete-user (:uid response)))))))
 
+(deftest test-set-display-name
+	(testing "Testing the retrieval of user by uid or by email"
+			(let [unique (str (uuid/v1))]
+				(let [prep (#'charmander.admin/create-user (str unique "@domain.com") "superDuperSecure")]
+					(let [response (#'charmander.admin/set-user-display-name (:uid prep) "Charmander")]
+						(do
+							(is (= (:uid response) (:uid prep)))
+							(is (= (:display-name response) "Charmander")))
+							(is (not (=  (:display-name response) (:display-name  prep))))
+							(#'charmander.admin/delete-user (:uid prep)))))))
+
 ;(println (env :firebase-service-key))
 ;(println (#'charmander.admin/delete-user "nHdBq5wEu3WOEd3IfjLiaouXkr03"))
 ;(println (#'charmander.admin/create-user "email@domain.com" "superDuperSecure"))
