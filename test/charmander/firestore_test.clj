@@ -22,7 +22,7 @@
 )
 
 
-(def batch '(	{:name "Charming" :priority 0 :fires ["Vermilion City","Viridian City"]}					
+(def batch '(	{:name "Charming" :priority 0 :fires ["Pallet Town","Vermilion City","Viridian City"]}					
 							{:name "Happy" :priority 1}
 							{:name "Adventurous" :priority 1}
 							{:name "Regal" :priority 2}
@@ -30,7 +30,7 @@
 							{:name "Amiable" :priority 3}
 							{:name "Naughty" :place 6 :fires ["Pallet Town","Pewter City"]}
 							{:name "Determined" :priority 6 :fires ["Lavender Town","Fuchsia City","Saffron City"]}
-							{:name "Eager" :position 6 :fires ["Celadon City","Cerulean City","Cinnabar Island"]}
+							{:name "Eager" :position 6 :fires ["Pallet Town","Celadon City","Cerulean City","Cinnabar Island"]}
 							{:name "Ready" :priority 10}))
 
 (def path (str (uuid/v1) "/empty-doc/" (uuid/v1)))
@@ -75,9 +75,9 @@
 
 (deftest test-query-equals-1
 		(testing "Testing a query with equals"
-			(let [result (#'charmander.firestore/query-collection path :where "name" :equals (:name (first batch)))]
+			(let [result (#'charmander.firestore/query-collection path :where "name" :equals "Charming")]
 				(is (= (count result) 1))
-				(is (= (-> (first result) :data :name) (:name (first batch)))))))
+				(is (= (-> (first result) :data :name) "Charming")))))
 
 (deftest test-query-equals-2
 		(testing "Testing a query with equals"
@@ -86,9 +86,9 @@
 
 (deftest test-query-equal-to-1
 		(testing "Testing a query with equal-to"
-			(let [result (#'charmander.firestore/query-collection path :where "name" :equal-to (:name (first batch)))]
+			(let [result (#'charmander.firestore/query-collection path :where "name" :equal-to "Adventurous")]
 				(is (= (count result) 1))
-				(is (= (-> (first result) :data :name) (:name (first batch)))))))
+				(is (= (-> (first result) :data :name) "Adventurous")))))
 
 (deftest test-query-less-than-1
 		(testing "Testing a query with <"
@@ -206,11 +206,36 @@
 
 (deftest test-query-contains
 		(testing "Testing a query with array-contains"
-			(let [value "Lavender City"]
+			(let [value "Lavender Town"]
 					(let [result (#'charmander.firestore/query-collection path :where "fires" :contains value)]
-						(println result)
+						(is (= (-> (first result) :data :name) "Determined"))
 						(is (= (count result) 1))))))		
 
+(deftest test-query-contains-2
+		(testing "Testing a query with array-contains"
+			(let [value "Pallet Town"]
+					(let [result (#'charmander.firestore/query-collection path :where "fires" :contains value)]
+						(is (= (count result) 3))))))	
+
+(deftest test-query-contains-3
+		(testing "Testing a query with array-contains"
+			(let [value "Cerulean City"]
+					(let [result (#'charmander.firestore/query-collection path :where "fires" :contains value)]
+						(is (= (-> (first result) :data :name) "Eager"))
+						(is (= (count result) 1))))))							
+
+(deftest test-query-contains-4
+		(testing "Testing a query with array-contains"
+			(let [value "Vermilion City"]
+					(let [result (#'charmander.firestore/query-collection path :where "fires" :contains value)]
+						(is (= (-> (first result) :data :name) "Charming"))
+						(is (= (count result) 1))))))		
+
+(deftest test-query-contains-5
+		(testing "Testing a query with array-contains"
+			(let [value "Violet City"]
+					(let [result (#'charmander.firestore/query-collection path :where "fires" :contains value)]
+						(is (= (count result) 0))))))		
 
 ;(pp/pprint (#'charmander.firestore/get-document "collection" "document"))
 ;(pp/pprint (#'charmander.firestore/get-document-and-subcollections "collection" "document"))
