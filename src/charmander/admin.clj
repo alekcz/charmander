@@ -79,6 +79,7 @@
   (let [firebase-auth (. FirebaseAuth getInstance)]
     (try
       (. firebase-auth deleteUser uuid)
+      (catch IllegalArgumentException iae {:error true :error-code "invalid-uid"})
       (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
 
 (defn get-user [uuid]
@@ -128,6 +129,7 @@
         update-request (new UserRecord$UpdateRequest uuid)]
     (try
       (convert-user-record-to-map (. firebase-auth updateUser (doto update-request (.setDisplayName display-name))))
+      (catch IllegalArgumentException iae {:error true :error-code "invalid-display-name"})
       (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
 
 (defn set-user-photo-url [uuid photo-url]
@@ -135,6 +137,7 @@
         update-request (new UserRecord$UpdateRequest uuid)]
     (try
       (convert-user-record-to-map (. firebase-auth updateUser (doto update-request (.setPhotoUrl photo-url))))
+      (catch IllegalArgumentException iae {:error true :error-code "invalid-photo-url"})
       (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
 
 (defn generate-password-reset-link [email]

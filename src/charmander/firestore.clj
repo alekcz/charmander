@@ -33,15 +33,7 @@
   (let [f (fn [[k v]] (if (keyword? k) [(name k) v] [k v]))]
     (clojure.walk/postwalk (fn [x] (if (map? x) (into {} (map f x)) x)) m)))  
 
-;(def firestore (atom nil))
-
 ; private methods
-
-(defn- build-firebase-options [key-file-json database-name] 
-  (-> (new FirebaseOptions$Builder) ;use thread-first when the final part of the function will return value to be used
-      (.setCredentials (GoogleCredentials/fromStream (io/input-stream key-file-json))) 
-      (.setDatabaseUrl (str "https://" database-name ".firebaseio.com"))
-      (.build)))
 
 (defn- snapshot-to-map [snapshot]
   (keywordize-keys (into {} (. snapshot getData))))

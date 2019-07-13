@@ -33,7 +33,8 @@
 							{:name "Eager" :position 6 :fires ["Pallet Town","Celadon City","Cerulean City","Cinnabar Island"]}
 							{:name "Ready" :priority 10}))
 
-(def path (str (uuid/v1) "/empty-doc/" (uuid/v1)))
+(def docpath (str (uuid/v1) ""))
+(def path (str docpath "/doc/" (uuid/v1)))
 
 (defn- add-batch []
 	(doseq [x batch]
@@ -47,6 +48,7 @@
 (defn firestore-fixture [f]
 	(#'charmander.admin/init)
 	(add-batch)
+	(#'charmander.firestore/create-document docpath "doc" {:name "Charmander"})
 	(f)
 	(delete-batch))
 
@@ -102,6 +104,26 @@
 						(is (= (-> docu :data :name) nil))
 						(#'charmander.firestore/delete-document unique1 unique2)
 						(is (nil? (#'charmander.firestore/get-document unique1 unique2))))))))
+
+(deftest test-get-document-with-subcollections
+		(testing "Testing retrieving documents that has a subcollections"
+			(let [docu (#'charmander.firestore/get-document path "doc")]
+				(is (= (:id docu) "doc"))
+				(is (= (-> docu :data :name) "Charmander"))
+				(is (= (contains? docu :id) true))
+				(is (= (contains? docu :data) true))
+				(is (= (contains? (:data docu) :subcollections) true))
+				(is (= (count (-> docu :data :subcollections)) 1)))))
+
+(deftest test-get-document-and-subcollections
+		(testing "Testing retrieving documents and its subcollections"
+			(let [docu (#'charmander.firestore/get-document-and-subcollections docpath "doc")]
+				(is (= (:id docu) "doc"))
+				(is (= (-> docu :data :name) "Charmander"))
+				(is (= (contains? docu :id) true))
+				(is (= (contains? docu :data) true))
+				(is (= (contains? (:data docu) :subcollections) true))
+				(is (= (count (:data (first (-> docu :data :subcollections)))) 10)))))
 
 (deftest test-query-no-params
 		(testing "Testing a query with no parameters"

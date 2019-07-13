@@ -72,20 +72,20 @@
 
 (deftest test-set-user-email-1
 	(testing "Testing the setting of user email"
-			(let [unique (str (uuid/v1))]
+			(let [unique (str (uuid/v1)) unique2 (str (uuid/v1))]
 				(let [prep (#'charmander.admin/create-user (str unique "@domain.com") "superDuperSecure")]
-					(let [response (#'charmander.admin/set-user-email (:uid prep) "charm@nder.com")]
+					(let [response (#'charmander.admin/set-user-email (:uid prep) (str unique2 "@domain.com"))]
 						(do
 							(is (= (:uid response) (:uid prep)))
-							(is (= (:email response) "charm@nder.com")))
+							(is (= (:email response) (str unique2 "@domain.com")))
 							(is (not (=  (:email response) (:email  prep))))
-							(#'charmander.admin/delete-user (:uid prep)))))))
+							(#'charmander.admin/delete-user (:uid prep))))))))
 
 (deftest test-set-user-email-2
 	(testing "Testing the setting of user email"
-			(let [unique (str (uuid/v1))]
-				(let [prep (#'charmander.admin/create-user (str unique "@domain.com") "superDuperSecure") prep2 (#'charmander.admin/create-user "charm@nder.com" "superDuperSecure")]
-					(let [response (#'charmander.admin/set-user-email (:uid prep) "charm@nder.com")]
+			(let [unique (str (uuid/v1)) unique2 (str (uuid/v1))]
+				(let [prep (#'charmander.admin/create-user (str unique "@domain.com") "superDuperSecure") prep2 (#'charmander.admin/create-user (str unique2 "@domain.com")  "superDuperSecure")]
+					(let [response (#'charmander.admin/set-user-email (:uid prep) (str unique2 "@domain.com"))]
 						(do
 							(is (:error response))
 							(#'charmander.admin/delete-user (:uid prep))
