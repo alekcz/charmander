@@ -3,6 +3,7 @@
   					[clojure.string :as str]
 						[clojure.pprint :as pp]
 						[clj-uuid :as uuid]
+						[charmander.admin :refer :all]
   				  [charmander.firestore :refer :all])
 	(:import 	com.google.auth.oauth2.GoogleCredentials
 						com.google.firebase.FirebaseApp
@@ -124,6 +125,17 @@
 				(is (= (contains? docu :data) true))
 				(is (= (contains? (:data docu) :subcollections) true))
 				(is (= (count (:data (first (-> docu :data :subcollections)))) 10)))))
+
+(deftest test-add-to-document-collection
+		(testing "Testing create and reading documents in Firestore"
+			(let [unique1 (str (uuid/v1)) unique2 (str (uuid/v1))]
+				(do
+					(let [prep (#'charmander.firestore/add-document-to-collection (str unique1 "/o/" unique2) {:name "Documentation"})]
+						(let [docu (first (#'charmander.firestore/query-collection (str unique1 "/o/" unique2) :where "name" :equals "Documentation"))]
+							(is (= (:id docu) (:id prep)))
+							(is (= (-> docu :data :name) (-> prep :data :name)))
+							(is (= (-> docu :data :name) "Documentation"))
+							(#'charmander.firestore/delete-document (str unique1 "/o/" unique2) (:id prep))))))))
 
 (deftest test-query-no-params
 		(testing "Testing a query with no parameters"

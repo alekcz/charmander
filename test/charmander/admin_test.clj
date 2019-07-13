@@ -22,8 +22,12 @@
 					(is (= 1 (- 2 1)))))))
 )
 
-;Initialise Firebase Admin
-(#'charmander.admin/init)
+;Test fixtures
+(defn admin-fixture [f]
+	(#'charmander.admin/init)
+	(f))
+
+(use-fixtures :once admin-fixture)
 
 ; Tests for the Admin SDK
 
@@ -41,12 +45,14 @@
 (deftest test-all-get-users
 	(testing "Testing the retrieval of user by uid or by email"
 			(let [unique (str (uuid/v1))]
-				(let [response (#'charmander.admin/create-user (str unique "@domain.com") "superDuperSecure")]
-					(do
-						(is (= (#'charmander.admin/get-user (:uid response)) response))
-						(is (= (#'charmander.admin/get-user-by-email (:email response)) response))
-						(is (= (#'charmander.admin/get-user-by-email (:email response)) (#'charmander.admin/get-user (:uid response))))
-						(#'charmander.admin/delete-user (:uid response)))))))
+				(let [prep (#'charmander.admin/create-user (str unique "@domain.com") "superDuperSecure")]
+					(let [response (#'charmander.admin/set-user-phone-number (:uid prep) "+27123456789")]
+						(do
+							(is (= (#'charmander.admin/get-user (:uid response)) response))
+							(is (= (#'charmander.admin/get-user-by-phone-number "+27123456789") response))
+							(is (= (#'charmander.admin/get-user-by-email (:email response)) response))
+							(is (= (#'charmander.admin/get-user-by-email (:email response)) (#'charmander.admin/get-user (:uid response))))
+							(#'charmander.admin/delete-user (:uid response))))))))
 
 (deftest test-set-display-name
 	(testing "Testing the  setting of user display name"
@@ -57,9 +63,9 @@
 							(is (= (:uid response) (:uid prep)))
 							(is (= (:display-name response) "Charmander")))
 							(is (not (=  (:display-name response) (:display-name  prep))))
-							(#'charmander.admin/delete-user (:uid prep)))))))
+							(#'charmander.admin/delete-user (:uid prep)))))))						
 
-(deftest test-set-phone-number
+(deftest test-set-phone-number-1
 	(testing "Testing the setting of user phone number"
 			(let [unique (str (uuid/v1))]
 				(let [prep (#'charmander.admin/create-user (str unique "@domain.com") "superDuperSecure")]
@@ -69,6 +75,34 @@
 							(is (= (:phone-number response) "+27123456789")))
 							(is (not (=  (:phone-number response) (:phone-number  prep))))
 							(#'charmander.admin/delete-user (:uid prep)))))))
+
+(deftest test-set-phone-number-2
+	(testing "Testing the setting of user phone number"
+			(let [unique (str (uuid/v1))]
+				(let [prep (#'charmander.admin/create-user (str unique "@domain.com") "superDuperSecure")]
+					(let [response (#'charmander.admin/set-user-phone-number (:uid prep) "")]
+						(do
+							(is (:error response))
+							(#'charmander.admin/delete-user (:uid prep))))))))
+
+(deftest test-set-photo-url-1
+	(testing "Testing the setting of user photo url"
+			(let [unique (str (uuid/v1))]
+				(let [prep (#'charmander.admin/create-user (str unique "@domain.com") "superDuperSecure")]
+					(let [response (#'charmander.admin/set-user-photo-url (:uid prep) "https://www.domain.com/pic.jpg")]
+						(do
+							(is (= (:uid response) (:uid prep)))
+							(is (= (:photo-url response) "https://www.domain.com/pic.jpg")))
+							(#'charmander.admin/delete-user (:uid prep)))))))
+
+(deftest test-set-photo-url-2
+	(testing "Testing the setting of user photo url"
+			(let [unique (str (uuid/v1))]
+				(let [prep (#'charmander.admin/create-user (str unique "@domain.com") "superDuperSecure")]
+					(let [response (#'charmander.admin/set-user-photo-url (:uid prep) "domain.com/pic.jpg")]
+						(do
+							(is (:error response))
+							(#'charmander.admin/delete-user (:uid prep))))))))
 
 (deftest test-set-user-email-1
 	(testing "Testing the setting of user email"
@@ -110,12 +144,18 @@
 							(is (:error response))
 							(#'charmander.admin/delete-user (:uid prep))))))))
 
-;(println (env :firebase-service-key))
-;(println (#'charmander.admin/delete-user "nHdBq5wEu3WOEd3IfjLiaouXkr03"))
-;(println (#'charmander.admin/create-user "email@domain.com" "superDuperSecure"))
-;(println (#'charmander.admin/get-user "foHCpMoaT7P3WXeBTgWR261Z2mX2"))
-;(println (#'charmander.admin/get-user-by-email "email@domain.com"))
-;(println (#'charmander.admin/set-user-display-name "foHCpMoaT7P3WXeBTgWR261Z2mX2" "email"))
-;(println (#'charmander.admin/set-user-password "foHCpMoaT7P3WXeBTgWR261Z2mX2" "superDuperExtra53cur3"))
-;(println (#'charmander.admin/generate-email-verification-link "email@domain.com"))
-;(println (#'charmander.admin/generate-password-reset-link "email@domain.com"))
+(deftest test-email-verification
+	(testing "Testing the  setting of user password"
+		(let [unique (str (uuid/v1))]
+			(let [prep (#'charmander.admin/create-user (str unique "@domain.com") "superDuperSecure")]
+				(do
+					(is (str/includes? (#'charmander.admin/generate-email-verification-link (str unique "@domain.com")) "https://"))
+					(#'charmander.admin/delete-user (:uid prep)))))))
+
+(deftest test-password-reset
+	(testing "Testing the  setting of user password"
+		(let [unique (str (uuid/v1))]
+			(let [prep (#'charmander.admin/create-user (str unique "@domain.com") "superDuperSecure")]
+				(do
+					(is (str/includes? (#'charmander.admin/generate-password-reset-link (str unique "@domain.com")) "https://"))
+					(#'charmander.admin/delete-user (:uid prep)))))))

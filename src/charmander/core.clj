@@ -32,8 +32,7 @@
 	"Schedules the next update of the public key based on response header cache-control info (see https://firebase.google.com/docs/auth/admin/verify-id-tokens)"
 	(let [cache-control-header (:cache-control response-header)]
 		(let [seconds-to-next-update (Integer. (str/replace (re-find #"max-age=\d+" (str cache-control-header)) "max-age=" ""))]
-			(do
-				(at/after (* 3600 seconds-to-next-update) #(load-public-keys) thread-pool :desc "Refresh public keys")))))
+			(at/after (* 3600 seconds-to-next-update) #(load-public-keys) thread-pool :desc "Refresh public keys"))))
 
 ; Allow specific domains using regex
 
