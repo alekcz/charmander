@@ -104,6 +104,7 @@
         update-request (new UserRecord$UpdateRequest uuid)]
     (try
       (convert-user-record-to-map (. firebase-auth updateUser (doto update-request (.setEmail email) (.setEmailVerified false))))
+      (catch IllegalArgumentException iae {:error true :error-code "invalid-email"})
       (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
 
 (defn set-user-password [uuid password]
@@ -111,6 +112,7 @@
         update-request (new UserRecord$UpdateRequest uuid)]
     (try
       (convert-user-record-to-map (. firebase-auth updateUser (doto update-request (.setPassword password))))
+      (catch IllegalArgumentException iae {:error true :error-code "invalid-password"})
       (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
 
 (defn set-user-phone-number [uuid phone-number]
@@ -118,6 +120,7 @@
         update-request (new UserRecord$UpdateRequest uuid)]
     (try
       (convert-user-record-to-map (. firebase-auth updateUser (doto update-request (.setPhoneNumber phone-number))))
+      (catch IllegalArgumentException iae {:error true :error-code "invalid-phone-number"})
       (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
 
 (defn set-user-display-name [uuid display-name]
