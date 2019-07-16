@@ -64,7 +64,7 @@
 (defn- resolve-write-future [api-future]
   (try
     (. api-future get)
-  (catch Exception e ({:error (str (. e getMessage)})))))
+  (catch Exception e ({:error (str (. e getMessage))}))))
   
           
 ; public methods
