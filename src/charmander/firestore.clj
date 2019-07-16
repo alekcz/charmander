@@ -62,7 +62,9 @@
           :path (. x getPath)))))
 
 (defn- resolve-write-future [api-future]
-  (. api-future get))
+  (try
+    (. api-future get)
+  (catch Exception e ({:error (str (. e getMessage)})))))
   
           
 ; public methods
