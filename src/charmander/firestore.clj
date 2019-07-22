@@ -1,5 +1,6 @@
 (ns charmander.firestore
-  (:require [clojure.java.io :as io])
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str])
   (:import 	com.google.auth.oauth2.GoogleCredentials
             com.google.firebase.FirebaseApp
             com.google.firebase.FirebaseOptions
@@ -64,45 +65,49 @@
 (defn- resolve-write-future [api-future]
   (try
     (. api-future get)
-  (catch Exception e ({:error (str (. e getMessage))}))))
+  (catch Exception e {:error (str (. e getMessage))})))
   
-          
+(defn- clean [string]
+  string) ;turns out firebase can handle strings.
 ; public methods
 
 ; firestore api
 
 (defn get-document [collection document]
-  (let [firestore (FirestoreClient/getFirestore)] 
-    (let [reff (cast DocumentReference (-> firestore (.collection collection) (.document document)))]
-      (let [futuristic (cast ApiFuture (. reff get))]
-        (let [document-snapshot (cast DocumentSnapshot (. futuristic get))]
-          (if (. document-snapshot exists) 
-            (let [object (snapshot-to-map document-snapshot)]
-              (assoc {}
-              :id (. document-snapshot getId) 
-              :data (assoc object :subcollections (list-document-subcollection reff))))
-            nil))))))
+  (let [collection (clean collection) document (clean document)]
+    (let [firestore (FirestoreClient/getFirestore)] 
+      (let [reff (cast DocumentReference (-> firestore (.collection collection) (.document document)))]
+        (let [futuristic (cast ApiFuture (. reff get))]
+          (let [document-snapshot (cast DocumentSnapshot (. futuristic get))]
+            (if (. document-snapshot exists) 
+              (let [object (snapshot-to-map document-snapshot)]
+                (assoc {}
+                :id (. document-snapshot getId) 
+                :data (assoc object :subcollections (list-document-subcollection reff))))
+              nil)))))))
 
 (defn get-document-and-subcollections [collection document]
-  (let [firestore (FirestoreClient/getFirestore)] 
-    (let [reff (cast DocumentReference (-> firestore (.collection collection) (.document document)))]
-      (let [futuristic (cast ApiFuture (. reff get))]
-        (let [document-snapshot (cast DocumentSnapshot (. futuristic get))]
-          (if (. document-snapshot exists) 
-            (let [object (snapshot-to-map document-snapshot)]
-              (assoc {}
-              :id (. document-snapshot getId) 
-              :data (assoc object :subcollections (process-document-subcollection reff))))
-            nil))))))
+  (let [collection (clean collection) document (clean document)]
+    (let [firestore (FirestoreClient/getFirestore)] 
+      (let [reff (cast DocumentReference (-> firestore (.collection collection) (.document document)))]
+        (let [futuristic (cast ApiFuture (. reff get))]
+          (let [document-snapshot (cast DocumentSnapshot (. futuristic get))]
+            (if (. document-snapshot exists) 
+              (let [object (snapshot-to-map document-snapshot)]
+                (assoc {}
+                :id (. document-snapshot getId) 
+                :data (assoc object :subcollections (process-document-subcollection reff))))
+              nil)))))))
 
 (defn get-collection [collection]
-  (let [firestore (FirestoreClient/getFirestore)] 
-    (let [reff (cast CollectionReference (-> firestore (.collection collection)))]
-      (let [futuristic (cast ApiFuture (. reff get))]
-        (let [firestore-collection (. futuristic get)]
-            (let [collection-list (. firestore-collection getDocuments)]
-              (for [x collection-list] 
-                (assoc {} :id (. x getId) :data (snapshot-to-map x)) )))))))
+  (let [collection (clean collection)]
+    (let [firestore (FirestoreClient/getFirestore)] 
+      (let [reff (cast CollectionReference (-> firestore (.collection collection)))]
+        (let [futuristic (cast ApiFuture (. reff get))]
+          (let [firestore-collection (. futuristic get)]
+              (let [collection-list (. firestore-collection getDocuments)]
+                (for [x collection-list] 
+                  (assoc {} :id (. x getId) :data (snapshot-to-map x)) ))))))))
 
 (defn- query [collection-reference args]
   (let [property (:where args)]
@@ -132,46 +137,52 @@
         (-> collection-reference (.whereArrayContains property (:contains args))))))
 
 (defn query-collection [collection & args]
-  (let [arguments (apply hash-map args)]
-    (if (empty? (:where arguments))
-      (get-collection collection)    
-      (let [firestore (FirestoreClient/getFirestore)] 
-        (let [collref (cast CollectionReference (-> firestore (.collection collection)))]
-          (let [reff (query collref arguments)]
-            (let [futuristic (cast ApiFuture (. reff get))]
-              (let [firestore-collection (. futuristic get)]
-                  (let [collection-list (. firestore-collection getDocuments)]
-                    (for [x collection-list] 
-                      (assoc {} :id (. x getId) :data (snapshot-to-map x)) ))))))))))
+  (let [collection (clean collection)]
+    (let [arguments (apply hash-map args)]
+      (if (empty? (:where arguments))
+        (get-collection collection)    
+        (let [firestore (FirestoreClient/getFirestore)] 
+          (let [collref (cast CollectionReference (-> firestore (.collection collection)))]
+            (let [reff (query collref arguments)]
+              (let [futuristic (cast ApiFuture (. reff get))]
+                (let [firestore-collection (. futuristic get)]
+                    (let [collection-list (. firestore-collection getDocuments)]
+                      (for [x collection-list] 
+                        (assoc {} :id (. x getId) :data (snapshot-to-map x)) )))))))))))
 
 (defn add-document-to-collection [collection data]
-  (let [firestore (FirestoreClient/getFirestore)] 
-    (let [collreff (cast CollectionReference (-> firestore (.collection collection)))]
-      (let [pre-reff (-> collreff (.add (stringify-keys data)))]
-        (let [reff (. pre-reff get)]
-          (let [futuristic (cast ApiFuture (. reff get))]
-            (let [document-snapshot (cast DocumentSnapshot (. futuristic get))]
-              (let [object (snapshot-to-map document-snapshot)]
-                (assoc {}
-                :id (. document-snapshot getId) 
-                :data (assoc object :subcollections (list-document-subcollection reff)))))))))))
+  (let [collection (clean collection)]
+    (let [firestore (FirestoreClient/getFirestore)] 
+      (let [collreff (cast CollectionReference (-> firestore (.collection collection)))]
+        (let [pre-reff (-> collreff (.add (stringify-keys data)))]
+          (let [reff (. pre-reff get)]
+            (let [futuristic (cast ApiFuture (. reff get))]
+              (let [document-snapshot (cast DocumentSnapshot (. futuristic get))]
+                (let [object (snapshot-to-map document-snapshot)]
+                  (assoc {}
+                  :id (. document-snapshot getId) 
+                  :data (assoc object :subcollections (list-document-subcollection reff))))))))))))
 
 (defn create-document [collection name data]
-  (let [firestore (FirestoreClient/getFirestore)] 
-    (let [reff (cast DocumentReference (-> firestore (.collection collection) (.document name) ))]
-      (resolve-write-future (-> reff (.create (stringify-keys data)))))))
-      
+  (let [collection (clean collection)]
+    (let [firestore (FirestoreClient/getFirestore)] 
+      (let [reff (cast DocumentReference (-> firestore (.collection collection) (.document name) ))]
+        (resolve-write-future (-> reff (.create (stringify-keys data))))))))
+        
 (defn set-document [collection name data]
-  (let [firestore (FirestoreClient/getFirestore)] 
-    (let [reff (cast DocumentReference (-> firestore (.collection collection) (.document name) ))]
-      (resolve-write-future (-> reff (.set (stringify-keys data)))))))
+  (let [collection (clean collection)]
+    (let [firestore (FirestoreClient/getFirestore)] 
+      (let [reff (cast DocumentReference (-> firestore (.collection collection) (.document name) ))]
+        (resolve-write-future (-> reff (.set (stringify-keys data))))))))
 
 (defn update-document [collection name data]
-  (let [firestore (FirestoreClient/getFirestore)] 
-    (let [reff (cast DocumentReference (-> firestore (.collection collection) (.document name) ))]
-      (resolve-write-future (-> reff (.update (stringify-keys data)))))))
+  (let [collection (clean collection)]
+    (let [firestore (FirestoreClient/getFirestore)] 
+      (let [reff (cast DocumentReference (-> firestore (.collection collection) (.document name) ))]
+        (resolve-write-future (-> reff (.update (stringify-keys data))))))))
 
 (defn delete-document [collection name]
-  (let [firestore (FirestoreClient/getFirestore)] 
-    (let [reff (cast DocumentReference (-> firestore (.collection collection) (.document name) ))]
-      (resolve-write-future (-> reff (.delete))))))
+  (let [collection (clean collection)]
+    (let [firestore (FirestoreClient/getFirestore)] 
+      (let [reff (cast DocumentReference (-> firestore (.collection collection) (.document name) ))]
+        (resolve-write-future (-> reff (.delete)))))))

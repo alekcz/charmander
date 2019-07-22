@@ -137,6 +137,17 @@
 							(is (= (-> docu :data :name) "Documentation"))
 							(#'charmander.firestore/delete-document (str unique1 "/o/" unique2) (:id prep))))))))
 
+(deftest test-add-to-document-collection-with-spaces
+		(testing "Testing create and reading documents in Firestore when there are spaces in the name"
+			(let [unique1 (str (uuid/v1)) unique2 (str (uuid/v1))]
+				(do
+					(let [prep (#'charmander.firestore/add-document-to-collection (str unique1 " /o/ " unique2) {:name "Documentation"})]
+						(let [docu (first (#'charmander.firestore/query-collection (str unique1 " /o/ " unique2) :where "name" :equals "Documentation"))]
+							(is (= (:id docu) (:id prep)))
+							(is (= (-> docu :data :name) (-> prep :data :name)))
+							(is (= (-> docu :data :name) "Documentation"))
+							(#'charmander.firestore/delete-document (str unique1 " /o/ " unique2) (:id prep))))))))							
+
 (deftest test-query-no-params
 		(testing "Testing a query with no parameters"
 			(let [result (#'charmander.firestore/query-collection path)]
