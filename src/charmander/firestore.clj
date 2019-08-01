@@ -1,5 +1,6 @@
 (ns charmander.firestore
   (:require [clojure.java.io :as io]
+            [cheshire.core :as json]
             [clojure.string :as str])
   (:import 	com.google.auth.oauth2.GoogleCredentials
             com.google.firebase.FirebaseApp
@@ -37,7 +38,8 @@
 ; private methods
 
 (defn- snapshot-to-map [snapshot]
-  (keywordize-keys (into {} (. snapshot getData))))
+  (let [mapped (into {} (. snapshot getData))]
+    (-> mapped json/encode json/decode keywordize-keys)))
 
 (defn- process-document [reff]
    (let [futuristic (cast ApiFuture (. reff get))]
