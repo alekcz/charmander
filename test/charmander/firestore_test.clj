@@ -51,6 +51,7 @@
 	(add-batch)
 	(#'charmander.firestore/create-document docpath "doc" {:name "Charmander"})
 	(f)
+	(#'charmander.firestore/delete-document docpath "doc")
 	(delete-batch))
 
 (use-fixtures :once firestore-fixture)
@@ -152,12 +153,11 @@
 		(testing "Testing create and reading documents in Firestore"
 			; (let [unique1 (str (uuid/v1)) unique2 (str (uuid/v1)) prep {:name "Fast Documentation"}]
 			(let [unique1 "AA" unique2 "BB" prep {:name "Fast Documentation"}]
-				(do
-					(#'charmander.firestore/push-document-to-collection (str unique1 "/o/" unique2) prep)
-					(let [docu (first (#'charmander.firestore/query-collection (str unique1 "/o/" unique2) :where "name" :equals "Fast Documentation"))]
+				(let [_ (#'charmander.firestore/push-document-to-collection (str unique1 "/o/" unique2) prep)
+								docu (first (#'charmander.firestore/query-collection (str unique1 "/o/" unique2) :where "name" :equals "Fast Documentation"))]
 						(is (= (-> docu :data :name) (:name prep)))
 						(is (= (-> docu :data :name) "Fast Documentation"))
-						(#'charmander.firestore/delete-document (str unique1 "/o/" unique2) (:id docu)))))))				
+						(#'charmander.firestore/delete-document (str unique1 "/o/" unique2) (:id docu))))))		
 
 (deftest test-query-no-params
 		(testing "Testing a query with no parameters"
