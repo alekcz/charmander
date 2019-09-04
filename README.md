@@ -236,7 +236,16 @@ The the API allows for CRUB operation on firestore.
 ;;nil
 
 (charm-firestore/add-document-to-collection "path/to/collection" {:field1 "field1" :field2 "field2"})  
-;;nil
+;;  { :id "document",
+;;    :data {
+;;          :name "Document",
+;;          :subcollections ()
+;;     }
+;;  }
+
+(charm-firestore/push-document-to-collection "path/to/collection" {:field1 "field1" :field2 "field2"})  
+;; nil
+;; To allow increased through put this writes to firebase but gives not feedback.
 
 (charm-firestore/get-document "path/to/collection" "document")  
 ;;  { :id "document",
