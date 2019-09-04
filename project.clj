@@ -5,7 +5,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [ [org.clojure/clojure "1.8.0"]
                   [http-kit "2.4.0-alpha3"]
-                  [cheshire "5.6.3"]
+                  [cheshire "5.9.0"]
                   [buddy/buddy-sign "1.4.0"]
                   [buddy/buddy-core "1.2.0"]
                   [base64-clj "0.1.1"]
