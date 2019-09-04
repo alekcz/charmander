@@ -165,6 +165,12 @@
                   :id (. document-snapshot getId) 
                   :data (assoc object :subcollections (list-document-subcollection reff))))))))))))
 
+(defn push-document-to-collection [collection data]
+  (let [collection (clean collection)]
+    (let [firestore (FirestoreClient/getFirestore)] 
+      (let [collreff (cast CollectionReference (-> firestore (.collection collection)))]
+        (-> collreff (.add (stringify-keys data)))))))
+
 (defn create-document [collection name data]
   (let [collection (clean collection)]
     (let [firestore (FirestoreClient/getFirestore)] 
