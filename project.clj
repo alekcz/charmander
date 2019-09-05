@@ -20,7 +20,8 @@
                   [com.google.firebase/firebase-admin "6.8.1" :exclusions [[com.google.guava/guava-jdk5] [com.google.cloud/google-cloud-firestore]]]
                   ;[com.google.auth/google-auth-library-oauth2-http "0.16.2"]
                   [environ "1.1.0"]
-                  [danlentz/clj-uuid "0.1.9"]]
+                  [danlentz/clj-uuid "0.1.9"]
+                  [org.clojure/core.async "0.4.500"]]
                   
                   
   :plugins [[lein-ancient "0.6.15"]

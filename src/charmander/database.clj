@@ -1,7 +1,8 @@
 (ns charmander.database
   (:require [clojure.java.io :as io]
             [cheshire.core :as json]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [clojure.core.async :as async])
   (:import 	com.google.auth.oauth2.GoogleCredentials
             com.google.firebase.FirebaseApp
             com.google.firebase.FirebaseOptions
@@ -18,6 +19,7 @@
             com.google.firebase.database.DatabaseException
             com.google.firebase.database.MutableData
             com.google.firebase.database.ValueEventListener
+            com.google.firebase.database.ChildEventListener
             com.google.api.core.ApiFuture)
   (:gen-class))
 
@@ -61,20 +63,56 @@
     (let [reff (. database-instance getReference path)]
       (. reff updateChildrenAsync (stringify-keys data)))))
 
-(defn get-object [path] 
+(defn get-object [path channel]  
   (let [database-instance (. FirebaseDatabase getInstance)]
     (let [reff (. database-instance getReference path)]
-     (.addListenerForSingleValueEvent
-        reff
-        (reify ValueEventListener
-          (onDataChange [this dataSnapshot]
-            (normalize (. dataSnapshot getValue))))))))
+      (.addListenerForSingleValueEvent 
+        reff  (reify ValueEventListener
+                (onDataChange [this dataSnapshot]
+                  (let [snapshot (normalize (. dataSnapshot getValue))]
+                    (async/>!! channel snapshot))))))))
 
-(defn attach-listener-to-object [path callback] 
+(defn listen-to-object [path channel] 
   (let [database-instance (. FirebaseDatabase getInstance)]
     (let [reff (. database-instance getReference path)]
-      (.addValueEventListener reff
-        (reify ValueEventListener
-          (onDataChange [this dataSnapshot]
-            (callback (normalize (. dataSnapshot getValue)))))))))
-              
+      (.addValueEventListener 
+        reff (reify ValueEventListener
+              (onDataChange [this dataSnapshot]
+                (let [snapshot (normalize (. dataSnapshot getValue))]
+                  (async/>!! channel snapshot))))))))
+
+(defn listen-to-child-added [path channel] 
+  (let [database-instance (. FirebaseDatabase getInstance)]
+    (let [reff (. database-instance getReference path)]
+      (.addChildEventListener 
+        reff (reify ChildEventListener
+              (onChildAdded [this dataSnapshot prevChildKey]
+                (let [snapshot (normalize (. dataSnapshot getValue))]
+                  (async/>!! channel snapshot))))))))
+
+(defn listen-to-child-changed [path channel] 
+  (let [database-instance (. FirebaseDatabase getInstance)]
+    (let [reff (. database-instance getReference path)]
+      (.addChildEventListener 
+        reff (reify ChildEventListener
+              (onChildChanged [this dataSnapshot prevChildKey]
+                (let [snapshot (normalize (. dataSnapshot getValue))]
+                  (async/>!! channel snapshot))))))))
+
+(defn listen-to-child-removed [path channel] 
+  (let [database-instance (. FirebaseDatabase getInstance)]
+    (let [reff (. database-instance getReference path)]
+      (.addChildEventListener 
+        reff (reify ChildEventListener
+              (onChildRemoved [this dataSnapshot]
+                (let [snapshot (normalize (. dataSnapshot getValue))]
+                  (async/>!! channel snapshot))))))))
+
+(defn listen-to-child-moved [path channel] 
+  (let [database-instance (. FirebaseDatabase getInstance)]
+    (let [reff (. database-instance getReference path)]
+      (.addChildEventListener 
+        reff (reify ChildEventListener
+              (onChildMoved [this dataSnapshot prevChildKey]
+                (let [snapshot (normalize (. dataSnapshot getValue))]
+                  (async/>!! channel snapshot))))))))
