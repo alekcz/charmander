@@ -3,6 +3,7 @@
   					[clojure.string :as str]
 						[clojure.pprint :as pp]
 						[clj-uuid :as uuid]
+            [clojure.core.async :as async]
 						[charmander.admin :as charm-admin]
   				  [charmander.database :as charm-db])
 	(:import 	com.google.auth.oauth2.GoogleCredentials
@@ -32,11 +33,36 @@
 ; Tests for the Realtime Database SDK
 
 (deftest test-create-and-read-object
-		(testing "Testing create and reading object in Realtime Database"
-			(let [path (str "testing/" (uuid/v1) "/" (uuid/v1)) control-data {:name "Real Object"}]
-        (let [control (charm-db/push-object path {:name "Document"}) 
-              result (charm-db/get-object (str path))]
-              (println control)
-              (println result)
+  (testing "Testing create and reading object in Realtime Database"
+    (let [path (str "testing/" (uuid/v1) "/" (uuid/v1)) 
+          control-data {:name "Real Object"} 
+          channel (async/chan (async/buffer 1024))]
+      (let [control (charm-db/push-object path control-data) 
+            _ (charm-db/get-object path channel)]
+            (let [result (async/<!! channel)]
+              (is (= (:id result) control))
+              (is (= (:data result) control-data))
               (charm-db/delete-object path)
-              (is (nil? (charm-db/get-object path)))))))
+              (charm-db/get-object path channel)
+              (is (= false (async/<!! channel)))))))) ;we place false on the channel to signify nothing was found
+
+(deftest test-update-and-read-object
+  (testing "Testing create and reading object in Realtime Database"
+    (let [path (str "testing/" (uuid/v1) "/" (uuid/v1)) 
+          control-data {:name "Real Object"} 
+          control-data-2 {:name "Fake Object" :hoax true} 
+          channel (async/chan (async/buffer 1024))]
+      (let [control (charm-db/push-object path control-data) 
+            _ (charm-db/get-object path channel)]
+            (let [result (async/<!! channel)]
+              (is (= (:id result) control))
+              (is (= (:data result) control-data))
+              (charm-db/update-object (str path "/" control) control-data-2)
+              (charm-db/get-object path channel)
+              (let [new-result (async/<!! channel)]
+                (is (= (:id new-result) control))
+                (is (= (:data new-result) control-data-2))
+                (is (not= (-> new-result :data :hoax) (-> result :data :hoax)))
+                (charm-db/delete-object path)
+                (charm-db/get-object path channel)
+                (is (= false (async/<!! channel))))))))) ;we place false on the channel to signify nothing was found

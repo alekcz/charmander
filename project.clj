@@ -21,7 +21,8 @@
                   ;[com.google.auth/google-auth-library-oauth2-http "0.16.2"]
                   [environ "1.1.0"]
                   [danlentz/clj-uuid "0.1.9"]
-                  [org.clojure/core.async "0.4.500"]]
+                  [org.clojure/core.async "0.4.500"]
+                  [org.slf4j/slf4j-log4j12 "1.7.12"]]
                   
                   
   :plugins [[lein-ancient "0.6.15"]

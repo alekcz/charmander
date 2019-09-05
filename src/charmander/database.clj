@@ -36,8 +36,11 @@
     (clojure.walk/postwalk (fn [x] (if (map? x) (into {} (map f x)) x)) m)))  
 
 (defn- normalize [data]
-  (let [clojurified (json/decode (json/encode data) true)]
-     clojurified))
+  (if (nil? data)
+    false
+    (let [clojurified (json/decode (json/encode data) true)]
+        {:id (name (key (first clojurified)))
+        :data (val (first clojurified))})))
 
 ; database API
 
