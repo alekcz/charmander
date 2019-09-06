@@ -25,7 +25,7 @@
 
 ;Test fixtures
 (defn firestore-fixture [f]
-	(charm-admin/init "stub-web")
+	(charm-admin/init)
 	(f))
 
 (use-fixtures :once firestore-fixture)

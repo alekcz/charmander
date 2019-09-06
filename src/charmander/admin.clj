@@ -68,19 +68,19 @@
 ; public methods
 
 ; init admin api
-(defn init 
-  ([]
-    (try
-        (. FirebaseAuth getInstance) 
-      (catch IllegalStateException ise
-        (let [options (build-firebase-options)]
-          (. FirebaseApp initializeApp options)))))
-  ([database-name]
-    (try
-        (. FirebaseAuth getInstance) 
-      (catch IllegalStateException ise
-        (let [options (build-firebase-options database-name)]
-          (. FirebaseApp initializeApp options))))))
+(defn init []
+  (let [database-name (env :firebase-database)]
+    (if (nil? database-name)
+      (try
+          (. FirebaseAuth getInstance) 
+        (catch IllegalStateException ise
+          (let [options (build-firebase-options)]
+            (. FirebaseApp initializeApp options)))))
+      (try
+          (. FirebaseAuth getInstance) 
+        (catch IllegalStateException ise
+          (let [options (build-firebase-options database-name)]
+            (. FirebaseApp initializeApp options))))))
 
 ; user management api
 
