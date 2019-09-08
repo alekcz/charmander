@@ -42,12 +42,18 @@
     (let [clojurified (json/decode (json/encode data) true)]
        clojurified)))
 
+(def listener-map (atom {}))
+
+(defn has-listener [path listener]
+    (get-in @listener-map [path listener]))
+
+(defn add-listener [path listener]
+    (swap! listener-map assoc-in [path listener] true))  
+
 ; database API
 
 (defn init []
   (charm-admin/init))
-
-(def channel (async/chan (async/buffer 8096)))
 
 (defn push-object [path data] 
   (let [database-instance (. FirebaseDatabase getInstance)]
@@ -80,47 +86,67 @@
                   (let [snapshot (normalize (. dataSnapshot getValue))]
                     (async/>!! channel snapshot))))))))
 
-(defn listen-to-object [path] 
+(defn listen-to-object [path channel] 
   (let [database-instance (. FirebaseDatabase getInstance)]
     (let [reff (. database-instance getReference path)]
-      (.addValueEventListener 
-        reff (reify ValueEventListener
-              (onDataChange [this dataSnapshot]
-                (let [snapshot (normalize (. dataSnapshot getValue))]
-                  (async/>!! channel snapshot))))))))
+      (if (has-listener path "object")
+        nil
+        (do 
+          (add-listener path "object")
+          (.addValueEventListener 
+            reff  (reify ValueEventListener
+                    (onDataChange [this dataSnapshot]
+                      (let [snapshot (normalize (. dataSnapshot getValue))]
+                        (async/>!! channel snapshot))))))))))
 
 (defn listen-to-child-added [path channel] 
   (let [database-instance (. FirebaseDatabase getInstance)]
     (let [reff (. database-instance getReference path)]
-      (.addChildEventListener 
-        reff (reify ChildEventListener
-              (onChildAdded [this dataSnapshot prevChildKey]
-                (let [snapshot (normalize (. dataSnapshot getValue))]
-                  (async/>!! channel snapshot))))))))
+      (if (has-listener path "child-added")
+        nil
+        (do 
+          (add-listener path "child-added")
+          (.addChildEventListener 
+            reff  (reify ChildEventListener
+                    (onChildAdded [this dataSnapshot prevChildKey]
+                      (let [snapshot (normalize (. dataSnapshot getValue))]
+                        (async/>!! channel snapshot))))))))))
 
 (defn listen-to-child-changed [path channel] 
   (let [database-instance (. FirebaseDatabase getInstance)]
     (let [reff (. database-instance getReference path)]
-      (.addChildEventListener 
-        reff (reify ChildEventListener
-              (onChildChanged [this dataSnapshot prevChildKey]
-                (let [snapshot (normalize (. dataSnapshot getValue))]
-                  (async/>!! channel snapshot))))))))
+      (if (has-listener path "child-changed")
+        nil
+        (do 
+          (add-listener path "child-changed")
+          (.addChildEventListener 
+            reff  (reify ChildEventListener
+                    (onChildChanged [this dataSnapshot prevChildKey]
+                      (let [snapshot (normalize (. dataSnapshot getValue))]
+                        (async/>!! channel snapshot))))))))))
 
 (defn listen-to-child-removed [path channel] 
   (let [database-instance (. FirebaseDatabase getInstance)]
     (let [reff (. database-instance getReference path)]
-      (.addChildEventListener 
-        reff (reify ChildEventListener
-              (onChildRemoved [this dataSnapshot]
-                (let [snapshot (normalize (. dataSnapshot getValue))]
-                  (async/>!! channel snapshot))))))))
+      (if (has-listener path "child-removed")
+        nil
+        (do 
+          (add-listener path "child-removed")
+          (.addChildEventListener 
+            reff  (reify ChildEventListener
+                    (onChildRemoved [this dataSnapshot]
+                      (let [snapshot (normalize (. dataSnapshot getValue))]
+                        (async/>!! channel snapshot))))))))))
 
 (defn listen-to-child-moved [path channel] 
   (let [database-instance (. FirebaseDatabase getInstance)]
     (let [reff (. database-instance getReference path)]
-      (.addChildEventListener 
-        reff (reify ChildEventListener
-              (onChildMoved [this dataSnapshot prevChildKey]
-                (let [snapshot (normalize (. dataSnapshot getValue))]
-                  (async/>!! channel snapshot))))))))
+      (if (has-listener path "child-moved")
+        nil
+        (do 
+          (add-listener path "child-moved")
+          (.addChildEventListener 
+          reff  (reify ChildEventListener
+                  (onChildMoved [this dataSnapshot prevChildKey]
+                    (let [snapshot (normalize (. dataSnapshot getValue))]
+                      (async/>!! channel snapshot))))))))))
