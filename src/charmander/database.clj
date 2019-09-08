@@ -97,7 +97,8 @@
             reff  (reify ValueEventListener
                     (onDataChange [this dataSnapshot]
                       (let [snapshot (normalize (. dataSnapshot getValue))]
-                        (async/>!! channel snapshot))))))))))
+                        (async/>!! channel snapshot)))))
+          true)))))
 
 (defn listen-to-child-added [path channel] 
   (let [database-instance (. FirebaseDatabase getInstance)]
@@ -110,7 +111,8 @@
             reff  (reify ChildEventListener
                     (onChildAdded [this dataSnapshot prevChildKey]
                       (let [snapshot (normalize (. dataSnapshot getValue))]
-                        (async/>!! channel snapshot))))))))))
+                        (async/>!! channel snapshot)))))
+          true)))))
 
 (defn listen-to-child-changed [path channel] 
   (let [database-instance (. FirebaseDatabase getInstance)]
@@ -123,7 +125,8 @@
             reff  (reify ChildEventListener
                     (onChildChanged [this dataSnapshot prevChildKey]
                       (let [snapshot (normalize (. dataSnapshot getValue))]
-                        (async/>!! channel snapshot))))))))))
+                        (async/>!! channel snapshot)))))
+          true)))))
 
 (defn listen-to-child-removed [path channel] 
   (let [database-instance (. FirebaseDatabase getInstance)]
@@ -136,7 +139,8 @@
             reff  (reify ChildEventListener
                     (onChildRemoved [this dataSnapshot]
                       (let [snapshot (normalize (. dataSnapshot getValue))]
-                        (async/>!! channel snapshot))))))))))
+                        (async/>!! channel snapshot)))))
+          true)))))
 
 (defn listen-to-child-moved [path channel] 
   (let [database-instance (. FirebaseDatabase getInstance)]
@@ -149,4 +153,5 @@
           reff  (reify ChildEventListener
                   (onChildMoved [this dataSnapshot prevChildKey]
                     (let [snapshot (normalize (. dataSnapshot getValue))]
-                      (async/>!! channel snapshot))))))))))
+                      (async/>!! channel snapshot)))))
+          true)))))

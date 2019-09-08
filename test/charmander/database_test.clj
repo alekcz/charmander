@@ -38,10 +38,9 @@
           control-data {:name "Real Object"} 
           channel (async/chan (async/buffer 1024))]
       (let [control (charm-db/push-object path control-data) 
-            _ (charm-db/get-object path channel)]
+            _ (charm-db/get-object (str path "/" control) channel)]
             (let [result (async/<!! channel)]
-              (is (= (:id result) control))
-              (is (= (:data result) control-data))
+              (is (= result control-data))
               (charm-db/delete-object path)
               (charm-db/get-object path channel)
               (is (= false (async/<!! channel)))))))) ;we place false on the channel to signify nothing was found
@@ -53,16 +52,14 @@
           control-data-2 {:name "Fake Object" :hoax true} 
           channel (async/chan (async/buffer 1024))]
       (let [control (charm-db/push-object path control-data) 
-            _ (charm-db/get-object path channel)]
+            _ (charm-db/get-object (str path "/" control) channel)]
             (let [result (async/<!! channel)]
-              (is (= (:id result) control))
-              (is (= (:data result) control-data))
+              (is (= result control-data))
               (charm-db/update-object (str path "/" control) control-data-2)
-              (charm-db/get-object path channel)
+              (charm-db/get-object (str path "/" control) channel)
               (let [new-result (async/<!! channel)]
-                (is (= (:id new-result) control))
-                (is (= (:data new-result) control-data-2))
-                (is (not= (-> new-result :data :hoax) (-> result :data :hoax)))
+                (is (= new-result control-data-2))
+                (is (not= (-> new-result :hoax) (-> result :hoax)))
                 (charm-db/delete-object path)
-                (charm-db/get-object path channel)
+                (charm-db/get-object (str path "/" control) channel)
                 (is (= false (async/<!! channel))))))))) ;we place false on the channel to signify nothing was found
