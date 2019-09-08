@@ -1,6 +1,7 @@
 (ns charmander.database
   (:require [clojure.java.io :as io]
             [cheshire.core :as json]
+            [charmander.admin :as charm-admin]
             [clojure.string :as str]
             [clojure.core.async :as async])
   (:import 	com.google.auth.oauth2.GoogleCredentials
@@ -39,10 +40,14 @@
   (if (nil? data)
     false
     (let [clojurified (json/decode (json/encode data) true)]
-        {:id (name (key (first clojurified)))
-        :data (val (first clojurified))})))
+       clojurified)))
 
 ; database API
+
+(defn init []
+  (charm-admin/init))
+
+(def channel (async/chan (async/buffer 8096)))
 
 (defn push-object [path data] 
   (let [database-instance (. FirebaseDatabase getInstance)]
@@ -75,7 +80,7 @@
                   (let [snapshot (normalize (. dataSnapshot getValue))]
                     (async/>!! channel snapshot))))))))
 
-(defn listen-to-object [path channel] 
+(defn listen-to-object [path] 
   (let [database-instance (. FirebaseDatabase getInstance)]
     (let [reff (. database-instance getReference path)]
       (.addValueEventListener 

@@ -1,6 +1,7 @@
 (ns charmander.firestore
   (:require [clojure.java.io :as io]
             [cheshire.core :as json]
+            [charmander.admin :as charm-admin]
             [clojure.string :as str])
   (:import 	com.google.auth.oauth2.GoogleCredentials
             com.google.firebase.FirebaseApp
@@ -74,6 +75,8 @@
 ; public methods
 
 ; firestore api
+(defn init []
+  (charm-admin/init))
 
 (defn get-document [collection document]
   (let [collection (clean collection) document (clean document)]
