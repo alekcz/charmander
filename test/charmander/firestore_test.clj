@@ -3,7 +3,6 @@
   					[clojure.string :as str]
 						[clojure.pprint :as pp]
 						[clj-uuid :as uuid]
-						[charmander.admin :refer :all]
   				  [charmander.firestore :refer :all])
 	(:import 	com.google.auth.oauth2.GoogleCredentials
 						com.google.firebase.FirebaseApp
@@ -47,7 +46,7 @@
 
 ;Test fixtures
 (defn firestore-fixture [f]
-	(#'charmander.admin/init)
+	(#'charmander.firestore/init)
 	(add-batch)
 	(#'charmander.firestore/create-document docpath "doc" {:name "Charmander"})
 	(f)

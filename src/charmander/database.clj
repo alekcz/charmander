@@ -10,12 +10,12 @@
             com.google.firebase.FirebaseOptions$Builder
             com.google.firebase.auth.FirebaseAuth
             com.google.firebase.auth.FirebaseAuthException
-            ;firestore
+            ;realtime-database
             com.google.firebase.database.FirebaseDatabase	
+            com.google.firebase.database.Query
             com.google.firebase.database.DatabaseReference
             com.google.firebase.database.DataSnapshot
             com.google.firebase.database.Transaction
-            com.google.firebase.database.Query
             com.google.firebase.database.DatabaseError
             com.google.firebase.database.DatabaseException
             com.google.firebase.database.MutableData
@@ -42,6 +42,13 @@
     (let [clojurified (json/decode (json/encode data) true)]
        clojurified)))
 
+;For some obscure reason the java-admin-sdk only allows queries for numbers that are doubles. 
+(defn- handle-type [typed-data]
+  (if (number? typed-data) 
+    (double typed-data)
+    typed-data))
+
+
 (def listener-map (atom {}))
 
 (defn has-listener [path listener]
@@ -50,7 +57,38 @@
 (defn add-listener [path listener]
     (if (has-listener path listener)
       (swap! listener-map update-in [path listener] inc)
-      (swap! listener-map assoc-in [path listener] true)))  
+      (swap! listener-map assoc-in [path listener] 1)))  
+
+
+(defn order [db-reference args]
+  (cond 
+    (some? (:order-by-child args)) ;==
+      (-> db-reference (.orderByChild (:order-by-child args)))
+    (some? (:order-by-key args)) ;==
+      (-> db-reference (.orderByKey))
+    (some? (:order-by-value args)) ;==
+      (-> db-reference (.orderByValue (:order-by-value args)))
+    :else db-reference))
+
+(defn query [db-reference args]
+  ;(println (instance? com.google.firebase.database.DatabaseReference db-reference))
+  (let [query-reference (if (instance? com.google.firebase.database.DatabaseReference db-reference)
+                            (. db-reference orderByKey)
+                            db-reference )]
+    (cond 
+      (some? (:limit-to-first args)) ;==
+        (-> query-reference (.limitToFirst (handle-type (:limit-to-first args))))
+      (some? (:limit-to-last args)) ;==
+        (-> query-reference (.limitToLast (handle-type (:limit-to-last args))))
+      (some? (:start-at args)) ;==
+        (-> query-reference (.startAt (handle-type (:start-at args))))
+      (some? (:end-at args)) ;==
+        (-> query-reference (.endAt (handle-type (:end-at args))))      
+      (some? (:equal-to args)) ;==
+        (. query-reference equalTo (handle-type (:equal-to args)))      
+      (some? (:equals args)) ;==
+        (. query-reference equalTo (handle-type (:equals args)))        
+      :else query-reference)))
 
 ; database API
 
@@ -80,71 +118,77 @@
     (let [reff (. database-instance getReference path)]
       (. reff updateChildrenAsync (stringify-keys data)))))
 
-(defn get-object [path channel]  
-  (let [database-instance (. FirebaseDatabase getInstance)]
-    (let [reff (. database-instance getReference path)]
-      (.addListenerForSingleValueEvent 
-        reff  (reify ValueEventListener
-                (onDataChange [this dataSnapshot]
-                  (let [snapshot (normalize (. dataSnapshot getValue))]
-                    (async/>!! channel snapshot))))))))
-
-(defn listen-to-object [path channel] 
-  (let [database-instance (. FirebaseDatabase getInstance)]
-    (let [reff (. database-instance getReference path)]
-      (do 
-        (add-listener path "object")
-        (.addValueEventListener 
+(defn get-object [path channel & arguments]  
+  (let [database-instance (. FirebaseDatabase getInstance) args (apply hash-map arguments)]
+    (let [raw-reff (. database-instance getReference path)]
+      (let [reff (-> raw-reff (order args) (query args))]
+        (.addListenerForSingleValueEvent 
           reff  (reify ValueEventListener
                   (onDataChange [this dataSnapshot]
                     (let [snapshot (normalize (. dataSnapshot getValue))]
-                      (async/>!! channel snapshot)))))
-        true))))
+                      (async/>!! channel snapshot)))))))))
 
-(defn listen-to-child-added [path channel] 
+(defn listen-to-object [path channel & args] 
   (let [database-instance (. FirebaseDatabase getInstance)]
-    (let [reff (. database-instance getReference path)]
-      (do 
-        (add-listener path "child-added")
-        (.addChildEventListener 
+    (let [raw-reff (. database-instance getReference path)]
+      (let [reff (-> raw-reff (order args) (query args))]
+        (do 
+          (add-listener path "object")
+          (.addValueEventListener 
+            reff  (reify ValueEventListener
+                    (onDataChange [this dataSnapshot]
+                      (let [snapshot (normalize (. dataSnapshot getValue))]
+                        (async/>!! channel snapshot)))))
+          true)))))
+
+(defn listen-to-child-added [path channel & args] 
+  (let [database-instance (. FirebaseDatabase getInstance)]
+    (let [raw-reff (. database-instance getReference path)]
+      (let [reff (-> raw-reff (order args) (query args))]
+        (do 
+          (add-listener path "child-added")
+          (.addChildEventListener 
+            reff  (reify ChildEventListener
+                    (onChildAdded [this dataSnapshot prevChildKey]
+                      (let [snapshot (normalize (. dataSnapshot getValue))]
+                        (async/>!! channel snapshot)))))
+          true)))))
+
+(defn listen-to-child-changed [path channel & args] 
+  (let [database-instance (. FirebaseDatabase getInstance)]
+    (let [raw-reff (. database-instance getReference path)]
+      (let [reff (-> raw-reff (order args) (query args))]
+        (do 
+          (add-listener path "child-changed")
+          (.addChildEventListener 
+            reff  (reify ChildEventListener
+                    (onChildChanged [this dataSnapshot prevChildKey]
+                      (let [snapshot (normalize (. dataSnapshot getValue))]
+                        (async/>!! channel snapshot)))))
+          true)))))
+
+(defn listen-to-child-removed [path channel & args] 
+  (let [database-instance (. FirebaseDatabase getInstance)]
+    (let [raw-reff (. database-instance getReference path)]
+      (let [reff (-> raw-reff (order args) (query args))]
+        (do 
+          (add-listener path "child-removed")
+          (.addChildEventListener 
+            reff  (reify ChildEventListener
+                    (onChildRemoved [this dataSnapshot]
+                      (let [snapshot (normalize (. dataSnapshot getValue))]
+                        (async/>!! channel snapshot)))))
+          true)))))
+
+(defn listen-to-child-moved [path channel & args] 
+  (let [database-instance (. FirebaseDatabase getInstance)]
+    (let [raw-reff (. database-instance getReference path)]
+      (let [reff (-> raw-reff (order args) (query args))]
+        (do 
+          (add-listener path "child-moved")
+          (.addChildEventListener 
           reff  (reify ChildEventListener
-                  (onChildAdded [this dataSnapshot prevChildKey]
+                  (onChildMoved [this dataSnapshot prevChildKey]
                     (let [snapshot (normalize (. dataSnapshot getValue))]
                       (async/>!! channel snapshot)))))
-        true))))
-
-(defn listen-to-child-changed [path channel] 
-  (let [database-instance (. FirebaseDatabase getInstance)]
-    (let [reff (. database-instance getReference path)]
-      (do 
-        (add-listener path "child-changed")
-        (.addChildEventListener 
-          reff  (reify ChildEventListener
-                  (onChildChanged [this dataSnapshot prevChildKey]
-                    (let [snapshot (normalize (. dataSnapshot getValue))]
-                      (async/>!! channel snapshot)))))
-        true))))
-
-(defn listen-to-child-removed [path channel] 
-  (let [database-instance (. FirebaseDatabase getInstance)]
-    (let [reff (. database-instance getReference path)]
-      (do 
-        (add-listener path "child-removed")
-        (.addChildEventListener 
-          reff  (reify ChildEventListener
-                  (onChildRemoved [this dataSnapshot]
-                    (let [snapshot (normalize (. dataSnapshot getValue))]
-                      (async/>!! channel snapshot)))))
-        true))))
-
-(defn listen-to-child-moved [path channel] 
-  (let [database-instance (. FirebaseDatabase getInstance)]
-    (let [reff (. database-instance getReference path)]
-      (do 
-        (add-listener path "child-moved")
-        (.addChildEventListener 
-        reff  (reify ChildEventListener
-                (onChildMoved [this dataSnapshot prevChildKey]
-                  (let [snapshot (normalize (. dataSnapshot getValue))]
-                    (async/>!! channel snapshot)))))
-        true))))
+          true)))))
