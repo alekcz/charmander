@@ -34,7 +34,7 @@
 
 (deftest test-create-and-read-object
   (testing "Testing create and reading object in Realtime Database"
-    (let [path (str "testing/" (uuid/v1) "/" (uuid/v1)) 
+    (let [path (str "testing/" (uuid/v1) "/" (uuid/v4)) 
           control-data {:name "Real Object"} 
           channel (async/chan (async/buffer 48))]
       (let [control (charm-db/push-object path control-data) 
@@ -47,7 +47,7 @@
 
 (deftest test-update-and-read-object
   (testing "Testing create and reading object in Realtime Database"
-    (let [path (str "testing/" (uuid/v1) "/" (uuid/v1)) 
+    (let [path (str "testing/" (uuid/v1) "/" (uuid/v4)) 
           control-data {:name "Real Object"} 
           control-data-2 {:name "Fake Object" :hoax true} 
           channel (async/chan (async/buffer 48))]
@@ -64,36 +64,87 @@
                 (charm-db/get-object (str path "/" control) channel)
                 (is (= false (async/<!! channel))))))))) ;we place false on the channel to signify nothing was found
 
-(deftest test-create-and-query-object
+(deftest create-and-get-children
   (testing "Testing create and reading object in Realtime Database"
-    (let [path (str "testing/" (uuid/v1) "/1/" (uuid/v1)) 
-          control-data {:name "Real Object" :read false} 
-          channel (async/chan (async/buffer 48))]
-      (let [control (charm-db/push-object path control-data) 
-            _ (charm-db/get-object path channel :order-by-child "read" :equals false)]
-            (let [result (first (map val (async/<!! channel)))]
-              (is (= result control-data))
-              (charm-db/delete-object path)
-              (charm-db/get-object path channel)
-              (is (= false (async/<!! channel)))))))) ;we place false on the channel to signify nothing was found
-
-(deftest create-and-query-objects
-  (testing "Testing create and reading object in Realtime Database"
-    (let [path (str "testing/" (uuid/v1) "/" (uuid/v1)) 
-          control-data {:name "Real Object" :read false}
-          control-data2 {:name "Real Object 2" :read true}
-          control-data3 {:name "Real Object 3" :read false} 
+    (let [path (str "testing/" (uuid/v1) "/" (uuid/v4)) 
+          control-data {:name "Real Object 1" :place 3}
+          control-data2 {:name "Real Object 2" :place 1}
+          control-data3 {:name "Real Object 3" :place 2} 
           channel (async/chan (async/buffer 48))]
       (let [control (charm-db/push-object path control-data)
             control2 (charm-db/push-object path control-data2)
             control3 (charm-db/push-object path control-data3)       
-            _ (charm-db/get-object path channel :order-by-child "read" :equals false)]
-            (let [result (async/<!! channel)]
-              (let [result-list (map val result)]
-                (is (= (first result-list) control-data))
-                (is (= (second result-list) control-data3))
-                (is (= 2 (count result-list)))
-                (charm-db/delete-object path)
-                (charm-db/get-object path channel)
-                (is (= false (async/<!! channel))))))))) ;we place false on the channel to signify nothing was found
+            _ (charm-db/get-children path channel)]
+            (let [result-list (repeatedly 3 #(async/<!! channel))]
+                (is (= control-data  (nth result-list 0)))
+                (is (= control-data2 (nth result-list 1)))
+                (is (= control-data3 (nth result-list 2)))
+                (charm-db/delete-object path))))))
 
+(deftest create-and-get-children-order-by-child
+  (testing "Testing create and reading object in Realtime Database"
+    (let [path (str "testing/" (uuid/v1) "/" (uuid/v4)) 
+          control-data {:name "Real Object 1" :place 3}
+          control-data2 {:name "Real Object 2" :place 1}
+          control-data3 {:name "Real Object 3" :place 2} 
+          channel (async/chan (async/buffer 48))]
+      (let [control (charm-db/push-object path control-data)
+            control2 (charm-db/push-object path control-data2)
+            control3 (charm-db/push-object path control-data3)       
+            _ (charm-db/get-children path channel :order-by-child "place")]
+            (let [result-list (repeatedly 3 #(async/<!! channel))]
+                (is (= control-data  (nth result-list 2)))
+                (is (= control-data2 (nth result-list 0)))
+                (is (= control-data3 (nth result-list 1)))
+                (charm-db/delete-object path))))))
+
+(deftest create-and-get-children-equal-to
+  (testing "Testing create and reading object in Realtime Database"
+    (let [path (str "testing/" (uuid/v1) "/" (uuid/v4)) 
+          control-data {:name "Real Object 1" :place 3}
+          control-data2 {:name "Real Object 2" :place 1}
+          control-data3 {:name "Real Object 3" :place 2} 
+          channel (async/chan (async/buffer 48))]
+      (let [control (charm-db/push-object path control-data)
+            control2 (charm-db/push-object path control-data2)
+            control3 (charm-db/push-object path control-data3)       
+            _ (charm-db/get-children path channel :order-by-child "place" :equal-to 2)]
+            (let [only-value (async/<!! channel)
+                  result-len (.count (.buf channel))]
+                (is (= control-data3 only-value))
+                (is (= 0 result-len))
+                (charm-db/delete-object path))))))                
+
+(deftest create-and-get-children-start-at
+  (testing "Testing create and reading object in Realtime Database"
+    (let [path (str "testing/" (uuid/v1) "/" (uuid/v4)) 
+          control-data {:name "Real Object 1" :place 3}
+          control-data2 {:name "Real Object 2" :place 1}
+          control-data3 {:name "Real Object 3" :place 2} 
+          channel (async/chan (async/buffer 48))]
+      (let [control (charm-db/push-object path control-data)
+            control2 (charm-db/push-object path control-data2)
+            control3 (charm-db/push-object path control-data3)       
+            _ (charm-db/get-children path channel :order-by-child "place" :start-at 2)]
+            (let [only-value (async/<!! channel)
+                  result-len (.count (.buf channel))]
+                (is (= control-data3 only-value))
+                (is (= 1 result-len))
+                (charm-db/delete-object path))))))                                
+
+(deftest create-and-get-children-end-at
+  (testing "Testing create and reading object in Realtime Database"
+    (let [path (str "testing/" (uuid/v1) "/" (uuid/v4)) 
+          control-data {:name "Real Object 1" :place 3}
+          control-data2 {:name "Real Object 2" :place 1}
+          control-data3 {:name "Real Object 3" :place 2} 
+          channel (async/chan (async/buffer 48))]
+      (let [control (charm-db/push-object path control-data)
+            control2 (charm-db/push-object path control-data2)
+            control3 (charm-db/push-object path control-data3)       
+            _ (charm-db/get-children path channel :order-by-child "place" :end-at 1)]
+            (let [only-value (async/<!! channel)
+                  result-len (.count (.buf channel))]
+                (is (= control-data2 only-value))
+                (is (= 0 result-len))
+                (charm-db/delete-object path))))))                                

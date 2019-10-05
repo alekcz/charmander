@@ -42,12 +42,23 @@
     (let [clojurified (json/decode (json/encode data) true)]
        clojurified)))
 
+(defn iteration->seq [iteration]
+ (seq
+  (reify java.lang.Iterable 
+      (iterator [this] 
+         (reify java.util.Iterator
+           (hasNext [this] (.hasNext iteration))
+           (next [this] (.next iteration))
+           (remove [this] (.remove iteration)))))))
+
 ;For some obscure reason the java-admin-sdk only allows queries for numbers that are doubles. 
 (defn- handle-type [typed-data]
   (if (number? typed-data) 
     (double typed-data)
     typed-data))
 
+(defn- snapshotValue [^DataSnapshot dataSnapshot] 
+  (. dataSnapshot getValue))
 
 (def listener-map (atom {}))
 
@@ -85,9 +96,9 @@
       (some? (:end-at args)) ;==
         (-> query-reference (.endAt (handle-type (:end-at args))))      
       (some? (:equal-to args)) ;==
-        (. query-reference equalTo (handle-type (:equal-to args)))      
+        (-> query-reference (.equalTo (handle-type (:equal-to args))))      
       (some? (:equals args)) ;==
-        (. query-reference equalTo (handle-type (:equals args)))        
+        (-> query-reference (.equalTo (handle-type (:equals args))))        
       :else query-reference)))
 
 ; database API
@@ -128,6 +139,18 @@
                     (let [snapshot (normalize (. dataSnapshot getValue))]
                       (async/>!! channel snapshot)))))))))
 
+(defn get-children [path channel & arguments]  
+  (let [database-instance (. FirebaseDatabase getInstance) args (apply hash-map arguments)]
+    (let [raw-reff (. database-instance getReference path)]
+      (let [reff (-> raw-reff (order args) (query args))]
+        (.addListenerForSingleValueEvent 
+          reff  (reify ValueEventListener
+                  (onDataChange [this dataSnapshot]
+                    (let [iterator (. (. dataSnapshot getChildren) iterator)]
+                      (let [children (normalize (map snapshotValue (iterator-seq iterator)))]
+                        (doseq [child children]
+                          (async/>!! channel child)))))))))))                          
+
 (defn listen-to-object [path channel & args] 
   (let [database-instance (. FirebaseDatabase getInstance)]
     (let [raw-reff (. database-instance getReference path)]
@@ -150,9 +173,11 @@
           (.addChildEventListener 
             reff  (reify ChildEventListener
                     (onChildAdded [this dataSnapshot prevChildKey]
-                      (let [snapshot (normalize (. dataSnapshot getValue))]
-                        (async/>!! channel snapshot)))))
-          true)))))
+                      (let [iterator (. (. dataSnapshot getChildren) iterator)]
+                        (let [children (normalize (map snapshotValue (iterator-seq iterator)))]
+                          (doseq [child children]
+                            (async/>!! channel child))))
+          true))))))))
 
 (defn listen-to-child-changed [path channel & args] 
   (let [database-instance (. FirebaseDatabase getInstance)]
@@ -163,9 +188,11 @@
           (.addChildEventListener 
             reff  (reify ChildEventListener
                     (onChildChanged [this dataSnapshot prevChildKey]
-                      (let [snapshot (normalize (. dataSnapshot getValue))]
-                        (async/>!! channel snapshot)))))
-          true)))))
+                      (let [iterator (. (. dataSnapshot getChildren) iterator)]
+                        (let [children (normalize (map snapshotValue (iterator-seq iterator)))]
+                          (doseq [child children]
+                            (async/>!! channel child))))
+          true))))))))
 
 (defn listen-to-child-removed [path channel & args] 
   (let [database-instance (. FirebaseDatabase getInstance)]
@@ -176,9 +203,11 @@
           (.addChildEventListener 
             reff  (reify ChildEventListener
                     (onChildRemoved [this dataSnapshot]
-                      (let [snapshot (normalize (. dataSnapshot getValue))]
-                        (async/>!! channel snapshot)))))
-          true)))))
+                      (let [iterator (. (. dataSnapshot getChildren) iterator)]
+                        (let [children (normalize (map snapshotValue (iterator-seq iterator)))]
+                          (doseq [child children]
+                            (async/>!! channel child))))
+          true))))))))
 
 (defn listen-to-child-moved [path channel & args] 
   (let [database-instance (. FirebaseDatabase getInstance)]
@@ -189,6 +218,8 @@
           (.addChildEventListener 
           reff  (reify ChildEventListener
                   (onChildMoved [this dataSnapshot prevChildKey]
-                    (let [snapshot (normalize (. dataSnapshot getValue))]
-                      (async/>!! channel snapshot)))))
-          true)))))
+                    (let [iterator (. (. dataSnapshot getChildren) iterator)]
+                          (let [children (normalize (map snapshotValue (iterator-seq iterator)))]
+                            (doseq [child children]
+                              (async/>!! channel child))))
+          true))))))))
