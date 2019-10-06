@@ -1,5 +1,6 @@
 (ns charmander.admin
   (:require [clojure.java.io :as io]
+            [cheshire.core :as json]
             [environ.core :refer [env]])
   (:import 	com.google.auth.oauth2.GoogleCredentials
             com.google.firebase.FirebaseApp
@@ -64,7 +65,9 @@
     :phone-number (. user-record getPhoneNumber)
     :display-name (. user-record getDisplayName)
     :disabled (. user-record isDisabled)})
-          
+
+(defn- format-error [error]
+   (. error getMessage))
 ; public methods
 
 ; init admin api
@@ -85,85 +88,79 @@
 ; user management api
 
 (defn create-user [email password]
-  (let [firebase-auth (. FirebaseAuth getInstance) 
+  (try
+    (let [firebase-auth (. FirebaseAuth getInstance) 
         create-request (build-create-user-request email password)]
-    (try
-      (convert-user-record-to-map (. firebase-auth createUser create-request))
-      (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
+      (convert-user-record-to-map (. firebase-auth createUser create-request)))
+      (catch Exception e {:error true :error-data (format-error e)})))
 
 (defn delete-user [uuid]
-  (let [firebase-auth (. FirebaseAuth getInstance)]
-    (try
-      (. firebase-auth deleteUser uuid)
-      (catch IllegalArgumentException iae {:error true :error-code "invalid-uid"})
-      (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
+  (try
+    (let [firebase-auth (. FirebaseAuth getInstance)]
+      (. firebase-auth deleteUser uuid))
+      (catch Exception e {:error true :error-data (format-error e)})))
 
 (defn get-user [uuid]
-  (let [firebase-auth (. FirebaseAuth getInstance)]
-    (try
-      (convert-user-record-to-map (. firebase-auth getUser uuid))
-      (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
+  (try
+    (let [firebase-auth (. FirebaseAuth getInstance)]
+      (convert-user-record-to-map (. firebase-auth getUser uuid)))
+      (catch Exception e {:error true :error-data (format-error e)})))
 
 (defn get-user-by-email [email]
-  (let [firebase-auth (. FirebaseAuth getInstance)]
-    (try
-      (convert-user-record-to-map (. firebase-auth getUserByEmail email))
-      (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
+  (try
+    (let [firebase-auth (. FirebaseAuth getInstance)]
+      (convert-user-record-to-map (. firebase-auth getUserByEmail email)))
+      (catch Exception e {:error true :error-data (format-error e)})))
 
 (defn get-user-by-phone-number [phone-number]
-  (let [firebase-auth (. FirebaseAuth getInstance)]
-    (try
-      (convert-user-record-to-map (. firebase-auth 	getUserByPhoneNumber phone-number))
-      (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
+  (try
+    (let [firebase-auth (. FirebaseAuth getInstance)]
+      (convert-user-record-to-map (. firebase-auth 	getUserByPhoneNumber phone-number)))
+      (catch Exception e {:error true :error-data (format-error e)})))
 
 (defn set-user-email [uuid email]
-  (let [firebase-auth (. FirebaseAuth getInstance)
+  (try
+   (let [firebase-auth (. FirebaseAuth getInstance)
         update-request (new UserRecord$UpdateRequest uuid)]
-    (try
-      (convert-user-record-to-map (. firebase-auth updateUser (doto update-request (.setEmail email) (.setEmailVerified false))))
-      (catch IllegalArgumentException iae {:error true :error-code "invalid-email"})
-      (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
+      (convert-user-record-to-map (. firebase-auth updateUser (doto update-request (.setEmail email) (.setEmailVerified false)))))
+      (catch Exception e {:error true :error-data (format-error e)})))
 
 (defn set-user-password [uuid password]
-  (let [firebase-auth (. FirebaseAuth getInstance)
+  (try
+    (let [firebase-auth (. FirebaseAuth getInstance)
         update-request (new UserRecord$UpdateRequest uuid)]
-    (try
-      (convert-user-record-to-map (. firebase-auth updateUser (doto update-request (.setPassword password))))
-      (catch IllegalArgumentException iae {:error true :error-code "invalid-password"})
-      (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
+      (convert-user-record-to-map (. firebase-auth updateUser (doto update-request (.setPassword password)))))
+      (catch Exception e {:error true :error-data (format-error e)})))
 
 (defn set-user-phone-number [uuid phone-number]
-  (let [firebase-auth (. FirebaseAuth getInstance)
-        update-request (new UserRecord$UpdateRequest uuid)]
-    (try
-      (convert-user-record-to-map (. firebase-auth updateUser (doto update-request (.setPhoneNumber phone-number))))
-      (catch IllegalArgumentException iae {:error true :error-code "invalid-phone-number"})
-      (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
+  (try  
+    (let [firebase-auth (. FirebaseAuth getInstance)
+          update-request (new UserRecord$UpdateRequest uuid)]
+        (convert-user-record-to-map (. firebase-auth updateUser (doto update-request (.setPhoneNumber phone-number)))))
+        (catch Exception e {:error true :error-data (format-error e)})))
 
 (defn set-user-display-name [uuid display-name]
-  (let [firebase-auth (. FirebaseAuth getInstance)
+  (try
+    (let [firebase-auth (. FirebaseAuth getInstance)
         update-request (new UserRecord$UpdateRequest uuid)]
-    (try
-      (convert-user-record-to-map (. firebase-auth updateUser (doto update-request (.setDisplayName display-name))))
-      (catch IllegalArgumentException iae {:error true :error-code "invalid-display-name"})
-      (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
+      (convert-user-record-to-map (. firebase-auth updateUser (doto update-request (.setDisplayName display-name)))))
+      (catch Exception e {:error true :error-data (format-error e)})))
 
 (defn set-user-photo-url [uuid photo-url]
-  (let [firebase-auth (. FirebaseAuth getInstance)
+  (try
+    (let [firebase-auth (. FirebaseAuth getInstance)
         update-request (new UserRecord$UpdateRequest uuid)]
-    (try
-      (convert-user-record-to-map (. firebase-auth updateUser (doto update-request (.setPhotoUrl photo-url))))
-      (catch IllegalArgumentException iae {:error true :error-code "invalid-photo-url"})
-      (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
+      (convert-user-record-to-map (. firebase-auth updateUser (doto update-request (.setPhotoUrl photo-url)))))
+      (catch Exception e {:error true :error-data (format-error e)})))
 
 (defn generate-password-reset-link [email]
-  (let [firebase-auth (. FirebaseAuth getInstance)]
-    (try
-      (. firebase-auth generatePasswordResetLink email)
-      (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
+  (try
+    (let [firebase-auth (. FirebaseAuth getInstance)]
+      (. firebase-auth generatePasswordResetLink email))
+      (catch Exception e {:error true :error-data (format-error e)})))
 
 (defn generate-email-verification-link [email]
-  (let [firebase-auth (. FirebaseAuth getInstance)]
-    (try
-      (. firebase-auth generateEmailVerificationLink email)
-      (catch FirebaseAuthException fae {:error true :error-code (. fae getErrorCode)}))))
+  (try
+    (let [firebase-auth (. FirebaseAuth getInstance)]
+      (. firebase-auth generateEmailVerificationLink email))
+      (catch Exception e {:error true :error-data (format-error e)})))
