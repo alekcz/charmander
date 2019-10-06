@@ -26,4 +26,4 @@
                   
                   
   :plugins [[lein-ancient "0.6.15"]
-            [lein-cloverage "1.0.7-SNAPSHOT"]])
+            [lein-cloverage "1.1.2"]])
