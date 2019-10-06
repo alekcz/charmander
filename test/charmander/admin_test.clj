@@ -125,6 +125,14 @@
 							(#'charmander.admin/delete-user (:uid prep))
 							(#'charmander.admin/delete-user (:uid prep2))))))))
 
+(deftest test-set-user-email-3
+	(testing "Testing the setting of user email"
+			(let [unique (str (uuid/v1)) unique2 (str (uuid/v1))]
+				(let [prep (#'charmander.admin/create-user (str unique "@domain.com") "superDuperSecure")]
+					(let [response (#'charmander.admin/set-user-email (:uid prep) (str unique2))]
+						(do
+							(is (:error response))
+							(#'charmander.admin/delete-user (:uid prep))))))))
 
 (deftest test-set-password-1
 	(testing "Testing the  setting of user password"
@@ -144,6 +152,15 @@
 							(is (:error response))
 							(#'charmander.admin/delete-user (:uid prep))))))))
 
+(deftest test-set-password-3
+	(testing "Testing the  setting of user password"
+			(let [unique (str (uuid/v1))]
+				(let [prep (#'charmander.admin/create-user (str unique "@domain.com") "superDuperSecure")]
+					(let [response (#'charmander.admin/set-user-password (:uid prep) "123")]
+						(do
+							(is (:error response))
+							(#'charmander.admin/delete-user (:uid prep))))))))
+
 (deftest test-email-verification
 	(testing "Testing the  setting of user password"
 		(let [unique (str (uuid/v1))]
@@ -159,3 +176,9 @@
 				(do
 					(is (str/includes? (#'charmander.admin/generate-password-reset-link (str unique "@domain.com")) "https://"))
 					(#'charmander.admin/delete-user (:uid prep)))))))
+
+(deftest test-delete-user-error
+	(testing "Testing the  setting of user password"
+		(let [result (#'charmander.admin/delete-user "123abc123abcNotThere")]
+			(is (contains? result :error))
+			(is (contains? result :error-code)))))				

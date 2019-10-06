@@ -22,13 +22,7 @@
             com.google.firebase.database.ValueEventListener
             com.google.firebase.database.ChildEventListener
             com.google.api.core.ApiFuture)
-  (:gen-class))
-
-(defn- keywordize-keys
-  "Recursively transforms all map keys from strings to keywords."
-  [m]
-  (let [f (fn [[k v]] (if (string? k) [(keyword k) v] [k v]))]
-    (clojure.walk/postwalk (fn [x] (if (map? x) (into {} (map f x)) x)) m)))    
+  (:gen-class))   
 
 (defn- stringify-keys
   "Recursively transforms all map keys from keywords to strings."
@@ -41,15 +35,6 @@
     false
     (let [clojurified (json/decode (json/encode data) true)]
        clojurified)))
-
-(defn iteration->seq [iteration]
- (seq
-  (reify java.lang.Iterable 
-      (iterator [this] 
-         (reify java.util.Iterator
-           (hasNext [this] (.hasNext iteration))
-           (next [this] (.next iteration))
-           (remove [this] (.remove iteration)))))))
 
 ;For some obscure reason the java-admin-sdk only allows queries for numbers that are doubles. 
 (defn- handle-type [typed-data]
@@ -78,13 +63,13 @@
     (some? (:order-by-key args)) ;==
       (-> db-reference (.orderByKey))
     (some? (:order-by-value args)) ;==
-      (-> db-reference (.orderByValue (:order-by-value args)))
+      (-> db-reference (.orderByValue))
     :else db-reference))
 
 (defn query [db-reference args]
-  ;(println (instance? com.google.firebase.database.DatabaseReference db-reference))
   (let [query-reference (if (instance? com.google.firebase.database.DatabaseReference db-reference)
                             (. db-reference orderByKey)
+                            ;db-reference
                             db-reference )]
     (cond 
       (some? (:limit-to-first args)) ;==
@@ -161,8 +146,7 @@
             reff  (reify ValueEventListener
                     (onDataChange [this dataSnapshot]
                       (let [snapshot (normalize (. dataSnapshot getValue))]
-                        (async/>!! channel snapshot)))))
-          true)))))
+                        (async/>!! channel snapshot))))))))))
 
 (defn listen-to-child-added [path channel & args] 
   (let [database-instance (. FirebaseDatabase getInstance)]
@@ -173,11 +157,8 @@
           (.addChildEventListener 
             reff  (reify ChildEventListener
                     (onChildAdded [this dataSnapshot prevChildKey]
-                      (let [iterator (. (. dataSnapshot getChildren) iterator)]
-                        (let [children (normalize (map snapshotValue (iterator-seq iterator)))]
-                          (doseq [child children]
-                            (async/>!! channel child))))
-          true))))))))
+                      (let [snapshot (normalize (. dataSnapshot getValue))]
+                        (async/>!! channel snapshot))))))))))
 
 (defn listen-to-child-changed [path channel & args] 
   (let [database-instance (. FirebaseDatabase getInstance)]
@@ -188,11 +169,8 @@
           (.addChildEventListener 
             reff  (reify ChildEventListener
                     (onChildChanged [this dataSnapshot prevChildKey]
-                      (let [iterator (. (. dataSnapshot getChildren) iterator)]
-                        (let [children (normalize (map snapshotValue (iterator-seq iterator)))]
-                          (doseq [child children]
-                            (async/>!! channel child))))
-          true))))))))
+                     (let [snapshot (normalize (. dataSnapshot getValue))]
+                        (async/>!! channel snapshot))))))))))
 
 (defn listen-to-child-removed [path channel & args] 
   (let [database-instance (. FirebaseDatabase getInstance)]
@@ -203,11 +181,8 @@
           (.addChildEventListener 
             reff  (reify ChildEventListener
                     (onChildRemoved [this dataSnapshot]
-                      (let [iterator (. (. dataSnapshot getChildren) iterator)]
-                        (let [children (normalize (map snapshotValue (iterator-seq iterator)))]
-                          (doseq [child children]
-                            (async/>!! channel child))))
-          true))))))))
+                      (let [snapshot (normalize (. dataSnapshot getValue))]
+                        (async/>!! channel snapshot))))))))))
 
 (defn listen-to-child-moved [path channel & args] 
   (let [database-instance (. FirebaseDatabase getInstance)]
@@ -218,8 +193,5 @@
           (.addChildEventListener 
           reff  (reify ChildEventListener
                   (onChildMoved [this dataSnapshot prevChildKey]
-                    (let [iterator (. (. dataSnapshot getChildren) iterator)]
-                          (let [children (normalize (map snapshotValue (iterator-seq iterator)))]
-                            (doseq [child children]
-                              (async/>!! channel child))))
-          true))))))))
+                    (let [snapshot (normalize (. dataSnapshot getValue))]
+                        (async/>!! channel snapshot))))))))))
