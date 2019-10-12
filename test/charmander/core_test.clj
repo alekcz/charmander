@@ -113,7 +113,6 @@
 							(println error)
 							(let [data (json/decode body true)]
 								(let [validated (#'charmander.core/validate-token "(.*)" (:idToken data))]
-									(println validated)
 									(do
 										(is (= (:email validated) email))
 										(is (= (:email data) email))))))

@@ -39,7 +39,7 @@
           channel (async/chan (async/buffer 48))]
       (let [control (charm-db/push-object path control-data) 
             _ (charm-db/get-object (str path "/" control) channel)]
-            (let [result (async/<!! channel)]
+            (let [result (:data (async/<!! channel))]
               (is (= result control-data))
               (charm-db/delete-object path)
               (charm-db/get-object path channel)
@@ -53,11 +53,11 @@
           channel (async/chan (async/buffer 48))]
       (let [control (charm-db/push-object path control-data) 
             _ (charm-db/get-object (str path "/" control) channel)]
-            (let [result (async/<!! channel)]
+            (let [result (:data (async/<!! channel))]
               (is (= result control-data))
               (charm-db/update-object (str path "/" control) control-data-2)
               (charm-db/get-object (str path "/" control) channel)
-              (let [new-result (async/<!! channel)]
+              (let [new-result (:data (async/<!! channel))]
                 (is (= new-result control-data-2))
                 (is (not= (-> new-result :hoax) (-> result :hoax)))
                 (charm-db/delete-object path)
@@ -72,11 +72,11 @@
           channel (async/chan (async/buffer 48))]
       (let [control (charm-db/push-object path control-data) 
             _ (charm-db/get-object (str path "/" control) channel)]
-            (let [result (async/<!! channel)]
+            (let [result (:data (async/<!! channel))]
               (is (= result control-data))
               (charm-db/set-object (str path "/" control) control-data-2)
               (charm-db/get-object (str path "/" control) channel)
-              (let [new-result (async/<!! channel)]
+              (let [new-result (:data (async/<!! channel))]
                 (is (= new-result control-data-2))
                 (is (nil? (:name new-result)))
                 (is (contains? new-result :surname))
@@ -99,9 +99,9 @@
             control3 (charm-db/push-object path control-data3)       
             _ (charm-db/get-children path channel)]
             (let [result-list (repeatedly 3 #(async/<!! channel))]
-                (is (= control-data  (nth result-list 0)))
-                (is (= control-data2 (nth result-list 1)))
-                (is (= control-data3 (nth result-list 2)))
+                (is (= control-data  (:data (nth result-list 0))))
+                (is (= control-data2 (:data (nth result-list 1))))
+                (is (= control-data3 (:data (nth result-list 2))))
                 (charm-db/delete-object path))))))
 
 (deftest create-and-get-children-order-by-child
@@ -116,9 +116,9 @@
             control3 (charm-db/push-object path control-data3)       
             _ (charm-db/get-children path channel :order-by-child "place")]
             (let [result-list (repeatedly 3 #(async/<!! channel))]
-                (is (= control-data  (nth result-list 2)))
-                (is (= control-data2 (nth result-list 0)))
-                (is (= control-data3 (nth result-list 1)))
+                (is (= control-data  (:data (nth result-list 2))))
+                (is (= control-data2 (:data (nth result-list 0))))
+                (is (= control-data3 (:data (nth result-list 1))))
                 (charm-db/delete-object path))))))
 
 (deftest create-and-get-children-equal-to
@@ -132,7 +132,7 @@
             control2 (charm-db/push-object path control-data2)
             control3 (charm-db/push-object path control-data3)       
             _ (charm-db/get-children path channel :order-by-child "place" :equal-to 2)]
-            (let [only-value (async/<!! channel)
+            (let [only-value (:data (async/<!! channel))
                   result-len (.count (.buf channel))]
                 (is (= control-data3 only-value))
                 (is (= 0 result-len))
@@ -149,7 +149,7 @@
             control2 (charm-db/push-object path control-data2)
             control3 (charm-db/push-object path control-data3)       
             _ (charm-db/get-children path channel :order-by-child "place" :equals 2)]
-            (let [only-value (async/<!! channel)
+            (let [only-value (:data (async/<!! channel))
                   result-len (.count (.buf channel))]
                 (is (= control-data3 only-value))
                 (is (= 0 result-len))
@@ -166,7 +166,7 @@
             control2 (charm-db/push-object path control-data2)
             control3 (charm-db/push-object path control-data3)       
             _ (charm-db/get-children path channel :order-by-child "place" :start-at 2)]
-            (let [only-value (async/<!! channel)
+            (let [only-value (:data (async/<!! channel))
                   result-len (.count (.buf channel))]
                 (is (= control-data3 only-value))
                 (is (= 1 result-len))
@@ -183,7 +183,7 @@
             control2 (charm-db/push-object path control-data2)
             control3 (charm-db/push-object path control-data3)       
             _ (charm-db/get-children path channel :order-by-child "place" :end-at 1)]
-            (let [only-value (async/<!! channel)
+            (let [only-value (:data (async/<!! channel))
                   result-len (.count (.buf channel))]
                 (is (= control-data2 only-value))
                 (is (= 0 result-len))
@@ -201,9 +201,9 @@
             control3 (charm-db/push-object path control-data3)       
             _ (charm-db/get-children path channel :order-by-key true)]
             (let [result-list (repeatedly 3 #(async/<!! channel))]
-                (is (= control-data  (nth result-list 0)))
-                (is (= control-data2 (nth result-list 1)))
-                (is (= control-data3 (nth result-list 2)))
+                (is (= control-data  (:data (nth result-list 0))))
+                (is (= control-data2 (:data (nth result-list 1))))
+                (is (= control-data3 (:data (nth result-list 2))))
                 (charm-db/delete-object path))))))                                              
 
 (deftest create-and-get-children-order-by-key-2
@@ -214,7 +214,7 @@
       (let [control (charm-db/push-object path data)
             _ (charm-db/get-children (str path "/" control) channel :order-by-key true)]
             (let [result-list (repeatedly 4 #(async/<!! channel))]
-                (is (= (vals (into (sorted-map) data)) result-list))
+                (is (= (vals (into (sorted-map) data)) (map :data result-list)))
                 (charm-db/delete-object path))))))
 
 (deftest create-and-get-children-limit-to-first
@@ -228,7 +228,7 @@
             control2 (charm-db/push-object path control-data2)
             control3 (charm-db/push-object path control-data3)       
             _ (charm-db/get-children path channel :order-by-child "place" :limit-to-first 2)]
-            (let [first-value (async/<!! channel)
+            (let [first-value (:data (async/<!! channel))
                   result-len (.count (.buf channel))]
                 (is (= control-data2 first-value))
                 (is (= 1 result-len))
@@ -245,7 +245,7 @@
             control2 (charm-db/push-object path control-data2)
             control3 (charm-db/push-object path control-data3)       
             _ (charm-db/get-children path channel :order-by-child "place" :limit-to-last 2)]
-            (let [first-value (async/<!! channel)
+            (let [first-value (:data (async/<!! channel))
                   result-len (.count (.buf channel))]
                 (is (= control-data3 first-value))
                 (is (= 1 result-len))
@@ -259,7 +259,7 @@
       (let [control (charm-db/push-object path data)
             _ (charm-db/get-children (str path "/" control) channel :order-by-value true)]
             (let [result-list (repeatedly 4 #(async/<!! channel))]
-                (is (= (sort (vals data)) result-list))
+                (is (= (sort (vals data)) (map :data result-list)))
                 (charm-db/delete-object path))))))
 
 (deftest test-listen-to-object
@@ -270,11 +270,11 @@
           channel (async/chan (async/buffer 48))]
       (let [control (charm-db/push-object path control-data) 
             _ (charm-db/listen-to-object (str path "/" control) channel)]
-            (let [result (async/<!! channel)]
+            (let [result (:data (async/<!! channel))]
               (is (= result control-data))
               (is (= 0 (.count (.buf channel))))
               (charm-db/update-object (str path "/" control) control-data2)
-              (let [new-result (async/<!! channel)]
+              (let [new-result (:data (async/<!! channel))]
                 (is (= new-result control-data2))
                 (is (not= new-result result))
                 (charm-db/delete-object path)
@@ -289,11 +289,11 @@
           channel (async/chan (async/buffer 48))]
       (let [control (charm-db/push-object path control-data) 
             _ (charm-db/listen-to-child-added path channel)]
-            (let [result (async/<!! channel)]
+            (let [result (:data (async/<!! channel))]
               (is (= result control-data))
               (is (= 0 (.count (.buf channel))))
               (charm-db/push-object path control-data2)
-              (let [new-result (async/<!! channel)]
+              (let [new-result (:data (async/<!! channel))]
                 (is (= new-result control-data2))
                 (is (not= new-result result))
                 (charm-db/delete-object path)))))))
@@ -308,7 +308,7 @@
             _ (charm-db/listen-to-child-changed path channel)]
               (is (= 0 (.count (.buf channel))))
               (charm-db/set-object (str path "/" control) control-data2)
-              (let [new-result (async/<!! channel)]
+              (let [new-result (:data (async/<!! channel))]
                 (is (= new-result control-data2))
                 (charm-db/delete-object path))))))
 
@@ -321,7 +321,7 @@
             _ (charm-db/listen-to-child-removed path channel)]
               (is (= 0 (.count (.buf channel))))
               (charm-db/delete-object (str path "/" control))
-              (let [new-result (async/<!! channel)]
+              (let [new-result (:data (async/<!! channel))]
                 (is (= new-result control-data))
                 (charm-db/delete-object path))))))                
                            

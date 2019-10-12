@@ -43,7 +43,10 @@
     typed-data))
 
 (defn- snapshotValue [^DataSnapshot dataSnapshot] 
-  (. dataSnapshot getValue))
+  (if (. dataSnapshot exists)
+    { :id (. dataSnapshot getKey)
+      :data (. dataSnapshot getValue)}
+    false))
 
 (def listener-map (atom {}))
 
@@ -121,7 +124,7 @@
         (.addListenerForSingleValueEvent 
           reff  (reify ValueEventListener
                   (onDataChange [this dataSnapshot]
-                    (let [snapshot (normalize (. dataSnapshot getValue))]
+                    (let [snapshot (normalize (snapshotValue dataSnapshot))]
                       (async/>!! channel snapshot)))))))))
 
 (defn get-children [path channel & arguments]  
@@ -145,7 +148,7 @@
           (.addValueEventListener 
             reff  (reify ValueEventListener
                     (onDataChange [this dataSnapshot]
-                      (let [snapshot (normalize (. dataSnapshot getValue))]
+                      (let [snapshot (normalize (snapshotValue dataSnapshot))]
                         (async/>!! channel snapshot))))))))))
 
 (defn listen-to-child-added [path channel & args] 
@@ -157,7 +160,7 @@
           (.addChildEventListener 
             reff  (reify ChildEventListener
                     (onChildAdded [this dataSnapshot prevChildKey]
-                      (let [snapshot (normalize (. dataSnapshot getValue))]
+                      (let [snapshot (normalize (snapshotValue dataSnapshot))]
                         (async/>!! channel snapshot))))))))))
 
 (defn listen-to-child-changed [path channel & args] 
@@ -169,7 +172,7 @@
           (.addChildEventListener 
             reff  (reify ChildEventListener
                     (onChildChanged [this dataSnapshot prevChildKey]
-                     (let [snapshot (normalize (. dataSnapshot getValue))]
+                     (let [snapshot (normalize (snapshotValue dataSnapshot))]
                         (async/>!! channel snapshot))))))))))
 
 (defn listen-to-child-removed [path channel & args] 
@@ -181,7 +184,7 @@
           (.addChildEventListener 
             reff  (reify ChildEventListener
                     (onChildRemoved [this dataSnapshot]
-                      (let [snapshot (normalize (. dataSnapshot getValue))]
+                      (let [snapshot (normalize (snapshotValue dataSnapshot))]
                         (async/>!! channel snapshot))))))))))
 
 (defn listen-to-child-moved [path channel & args] 
@@ -193,5 +196,5 @@
           (.addChildEventListener 
           reff  (reify ChildEventListener
                   (onChildMoved [this dataSnapshot prevChildKey]
-                    (let [snapshot (normalize (. dataSnapshot getValue))]
+                    (let [snapshot (normalize (snapshotValue dataSnapshot))]
                         (async/>!! channel snapshot))))))))))
