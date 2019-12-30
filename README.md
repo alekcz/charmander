@@ -2,9 +2,7 @@
 
 A clojure library to make working with firebase easier
 
-[![Build Status](https://travis-ci.org/alekcz/charmander.svg?branch=master)](https://travis-ci.org/alekcz/charmander)
-
-[![codecov](https://codecov.io/gh/alekcz/charmander/branch/master/graph/badge.svg)](https://codecov.io/gh/alekcz/charmander)
+[![Build Status](https://travis-ci.org/alekcz/charmander.svg?branch=master)](https://travis-ci.org/alekcz/charmander) [![codecov](https://codecov.io/gh/alekcz/charmander/branch/master/graph/badge.svg)](https://codecov.io/gh/alekcz/charmander)
 
 [![Clojars Project](https://img.shields.io/clojars/v/alekcz/charmander.svg)](https://clojars.org/alekcz/charmander)
 
