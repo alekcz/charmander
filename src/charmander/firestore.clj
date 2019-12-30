@@ -1,6 +1,6 @@
 (ns charmander.firestore
   (:require [clojure.java.io :as io]
-            [cheshire.core :as json]
+            [jsonista.core :as json]
             [charmander.admin :as charm-admin]
             [clojure.string :as str])
   (:import 	com.google.auth.oauth2.GoogleCredentials
@@ -24,6 +24,8 @@
             com.google.cloud.firestore.CollectionReference)
   (:gen-class))
 
+(def mapper (json/object-mapper {:decode-key-fn true}))
+
 (defn- keywordize-keys
   "Recursively transforms all map keys from strings to keywords."
   [m]
@@ -40,7 +42,7 @@
 
 (defn- snapshot-to-map [snapshot]
   (let [mapped (into {} (. snapshot getData))]
-    (-> mapped json/encode json/decode keywordize-keys)))
+    (-> mapped json/write-value-as-string (json/read-value mapper))))
 
 (defn- process-document [reff]
    (let [futuristic (cast ApiFuture (. reff get))]

@@ -1,6 +1,5 @@
 (ns charmander.admin
   (:require [clojure.java.io :as io]
-            [cheshire.core :as json]
             [environ.core :refer [env]])
   (:import 	com.google.auth.oauth2.GoogleCredentials
             com.google.firebase.FirebaseApp

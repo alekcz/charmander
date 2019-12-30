@@ -1,11 +1,12 @@
-(defproject alekcz/charmander "0.8.0"
+(defproject alekcz/charmander "0.8.1"
   :description "Charmander: a set of libraries to make working with firebase easier in clojure"
   :url "https://github.com/alekcz/charmander"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [ [org.clojure/clojure "1.8.0"]
                   [http-kit "2.4.0-alpha3"]
-                  [cheshire "5.9.0"]
+                  [metosin/jsonista "0.2.2"]
+                  [gavagai "0.3.2"]
                   [buddy/buddy-sign "3.1.0"]
                   [buddy/buddy-core "1.6.0"]
                   [base64-clj "0.1.1"]

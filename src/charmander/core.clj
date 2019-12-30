@@ -1,7 +1,7 @@
 (ns charmander.core
 	(:require 
             [org.httpkit.client :as http]
-            [cheshire.core :as json]
+            [jsonista.core :as json]
             [clojure.string :as str]
             [base64-clj.core :as base64]
             [buddy.sign.jwt :as jwt]
@@ -12,12 +12,13 @@
 (def public-keys (atom nil))
 (def threadpool (at/mk-pool)) ;make threadpool for public key updates
 (def public-key-url  "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com")
+(def mapper (json/object-mapper {:decode-key-fn true}))
 
 ; Fetching and updating public keys
 
 (defn- update-public-keys [pubkey-atom data]
 	"Update the public key store with the desired data"
-	(reset! pubkey-atom (json/decode data true)))
+	(reset! pubkey-atom (json/read-value data mapper)))
 
 (defn- load-public-keys [threadpool callback]
 	"Loads the public keys from https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com"
@@ -70,7 +71,7 @@
 (defn- get-token-header [token]
 	"Retrieves header from token. Header is used to find appropriate public key (see https://firebase.google.com/docs/auth/admin/verify-id-tokens)"
     (let [token-array (str/split token #"\." 3)]
-    	(json/decode (base64/decode (pad-token (first token-array))) true)))
+    	(json/read-value (base64/decode (pad-token (first token-array))) mapper)))
 
 (defn- authenticate [projectid-regex token]
 	"Core library method. Validates token using public key and returns formatted data"

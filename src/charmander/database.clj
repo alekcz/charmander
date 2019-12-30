@@ -1,6 +1,6 @@
 (ns charmander.database
   (:require [clojure.java.io :as io]
-            [cheshire.core :as json]
+            [jsonista.core :as json]
             [charmander.admin :as charm-admin]
             [clojure.string :as str]
             [clojure.core.async :as async])
@@ -24,6 +24,8 @@
             com.google.api.core.ApiFuture)
   (:gen-class))   
 
+(def mapper (json/object-mapper {:decode-key-fn true}))
+
 (defn- stringify-keys
   "Recursively transforms all map keys from keywords to strings."
   [m]
@@ -33,7 +35,7 @@
 (defn- normalize [data]
   (if (nil? data)
     false
-    (let [clojurified (json/decode (json/encode data) true)]
+    (let [clojurified (json/read-value (json/write-value-as-string data) mapper)]
        clojurified)))
 
 ;For some obscure reason the java-admin-sdk only allows queries for numbers that are doubles. 

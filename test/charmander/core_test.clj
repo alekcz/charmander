@@ -3,14 +3,15 @@
   			[clojure.string :as str]
   			[buddy.sign.jwt :as jwt]
   			[overtone.at-at :as at]
-				[org.httpkit.client :as http]
-        [charmander.core :refer :all]
-				[environ.core :refer [env]]
-				[charmander.admin :as charm-admin]
-				[clj-uuid :as uuid]
-				[cheshire.core :as json]))
+			[org.httpkit.client :as http]
+			[charmander.core :as charm]
+			[environ.core :refer [env]]
+			[charmander.admin :as charm-admin]
+			[clj-uuid :as uuid]
+			[jsonista.core :as json]))
 
 (def ancient-firebase-token "eyJhbGciOiJSUzI1NiIsImtpZCI6IjU3ZGQ5ZGNmYmIxZDkzZWY2MWE1Y2Y5N2QxMjYxZjk5YTIxNWQ4YTAifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vbmVlZHR5cmVzemEiLCJhdWQiOiJuZWVkdHlyZXN6YSIsImF1dGhfdGltZSI6MTQ4OTgzMDQ5MSwidXNlcl9pZCI6Ikg1eHpTQW9nZkVOUlk4ampHbTFVS2hRVHZ5QTMiLCJzdWIiOiJINXh6U0FvZ2ZFTlJZOGpqR20xVUtoUVR2eUEzIiwiaWF0IjoxNDk3Mzk3MjA2LCJleHAiOjE0OTc0MDA4MDYsImVtYWlsIjoiYWxla2N6QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJlbWFpbCI6WyJhbGVrY3pAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoicGFzc3dvcmQifX0.mEQHljuKO5v2c_A38zH5KqzqYU_Nq8Q3hCEiQjFag1VL32voJndece8fjfCo0dKxFCkKNoTIgMidLiMUet2aTTk89JaCfIBlKzGs3i8o5FEzDbdb1VU5KsrKbeFkCnMu7v9B8K6d5xkAnIW6JI-1wLgTVYov8RlxHhRBYjn-iNd_CKMIUvwDMaPo4kYr70IqKmK8kgCha9x9FViBCdMncc9nPvZWN-OE22Lwmk3qjHhMfuLSYBWZa_KotvHiQFEc06Mdc0vj-JtOTKSGzl4ESrnnX4QQR6lKGUqsbwqk0h61_NQd0-tlQxelMb6td8U6ISvlzufIYTj5Lx9N1bhcgw")
+(def mapper (json/object-mapper {:decode-key-fn true}))
 
 (comment
 
@@ -95,7 +96,7 @@
 	(testing "Testing validate-token"
 		(let [token ancient-firebase-token]
 			(do
-				(is (nil? (charmander.core/validate-token  "(.*)" token)))))))
+				(is (nil? (charm/validate-token  "(.*)" token)))))))
 				
 
 (deftest test-verify-token	
@@ -108,11 +109,11 @@
 					(let [{:keys [status headers body error] :as resp} 
 								@(http/request {:url endpoint 
 																:method :post 
-																:body (json/encode {:email email :password password :returnSecureToken true})})]
+																:body (json/write-value-as-string {:email email :password password :returnSecureToken true})})]
 						(if error
 							(println error)
-							(let [data (json/decode body true)]
-								(let [validated (#'charmander.core/validate-token "(.*)" (:idToken data))]
+							(let [data (json/read-value body mapper)]
+								(let [validated (charm/validate-token "(.*)" (:idToken data))]
 									(do
 										(is (= (:email validated) email))
 										(is (= (:email data) email))))))
