@@ -228,7 +228,7 @@ The admin api only allows the creating of users using the email/password sign-in
 ```
 
 ### Working with Firestore (Alpha)
-The the API allows for CRUB operation on firestore.
+The API allows for CRUD operation on firestore.
 
 ```clojure
 
