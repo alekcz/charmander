@@ -16,7 +16,7 @@ A clojure library to make working with firebase easier
 
 ```clojure
 
-[alekcz/charmander "0.7.1"]
+[alekcz/charmander "0.8.3"]
 
 ;; In your ns statement:
 (ns my.ns
@@ -107,7 +107,7 @@ The Admin API is based on the Java Firebase Admin SDK v6.8.0
 
 3. Set the GOOGLE_CLOUD_PROJECT environment to the id of your project
 
-4. Set the FIREBASE_CONFIG environment variable to the contents of your `json` key file. (Sometimes it may be necessary to wrap the key contents in single quotes to escape all the special characters within it. e.g. FIREBASE_CONFIG='`contents-of-json`')
+4. Set the GOOGLE_APPLICATION_CREDENTIALS environment variable to the contents of your `json` key file. (Sometimes it may be necessary to wrap the key contents in single quotes to escape all the special characters within it. e.g. GOOGLE_APPLICATION_CREDENTIALS='`contents-of-json`')
 
 5. initialize the admin sdk in `charmander`
 

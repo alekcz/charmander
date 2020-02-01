@@ -1,6 +1,7 @@
 (ns charmander.admin
   (:require [clojure.java.io :as io]
-            [environ.core :refer [env]])
+            [environ.core :refer [env]]
+            [google-credentials.core :as g-cred])
   (:import 	com.google.auth.oauth2.GoogleCredentials
             com.google.firebase.FirebaseApp
             com.google.firebase.FirebaseOptions
@@ -24,27 +25,20 @@
 
 ; private methods
 
-(defn- string->stream
-  ([s] (string->stream s "UTF-8"))
-  ([s encoding]
-   (-> s
-       (.getBytes encoding)
-       (java.io.ByteArrayInputStream.))))
-
 (defn- build-firebase-options 
   ([]
     (try 
       (-> (new FirebaseOptions$Builder) ;use thread-first when the final part of the function will return value to be used
-          (.setCredentials (GoogleCredentials/fromStream (string->stream (env :firebase-config))));(io/input-stream key-file-json))) 
+          (.setCredentials (g-cred/load-credentials))
           (.build))
-    (catch Exception e (println "\nError: FIREBASE_CONFIG AND GOOGLE_CLOUD_PROJECT environment variables must both be set"))))
+    (catch Exception e (println "\nError: FIREBASE_CONFIG/GOOGLE_APPLICATION_CREDENTIALS AND GOOGLE_CLOUD_PROJECT environment variables must both be set"))))
   ([database-name]
     (try 
       (-> (new FirebaseOptions$Builder) ;use thread-first when the final part of the function will return value to be used
-          (.setCredentials (GoogleCredentials/fromStream (string->stream (env :firebase-config))));(io/input-stream key-file-json))) 
+          (.setCredentials (g-cred/load-credentials))
           (.setDatabaseUrl (str "https://" database-name ".firebaseio.com"))
           (.build))
-    (catch Exception e (println "\nError: FIREBASE_CONFIG AND GOOGLE_CLOUD_PROJECT environment variables must both be set")))))
+    (catch Exception e (println "\nError: FIREBASE_CONFIG/GOOGLE_APPLICATION_CREDENTIALS AND GOOGLE_CLOUD_PROJECT environment variables must both be set")))))
   
 
 (defn- build-create-user-request [email password] 

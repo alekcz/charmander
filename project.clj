@@ -1,4 +1,4 @@
-(defproject alekcz/charmander "0.8.1"
+(defproject alekcz/charmander "0.8.3"
   :description "Charmander: a set of libraries to make working with firebase easier in clojure"
   :url "https://github.com/alekcz/charmander"
   :license {:name "Eclipse Public License"
@@ -6,7 +6,6 @@
   :dependencies [ [org.clojure/clojure "1.8.0"]
                   [http-kit "2.4.0-alpha3"]
                   [metosin/jsonista "0.2.2"]
-                  [gavagai "0.3.2"]
                   [buddy/buddy-sign "3.1.0"]
                   [buddy/buddy-core "1.6.0"]
                   [base64-clj "0.1.1"]
@@ -23,8 +22,12 @@
                   [environ "1.1.0"]
                   [danlentz/clj-uuid "0.1.9"]
                   [org.clojure/core.async "0.4.500"]
-                  [org.slf4j/slf4j-log4j12 "1.7.12"]]
+                  [org.slf4j/slf4j-log4j12 "1.7.12"]
+                  [criterium "0.4.5"]
+                  [com.taoensso/tufte "2.1.0"]
+                  [alekcz/google-credentials "0.2.1"] ]
                   
-  :repl-options {:init-ns charmander.database}                
+  :repl-options {:init-ns charmander.database}       
+  :main ^:skip-aot charmander.benchmark-test         
   :plugins [[lein-ancient "0.6.15"]
             [lein-cloverage "1.1.2"]])
