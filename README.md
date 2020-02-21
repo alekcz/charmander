@@ -217,11 +217,11 @@ The admin api only allows the creating of users using the email/password sign-in
 ;;}
 
 (charm-admin/generate-email-verification-link "tony@hawk.cool")  
-;; https://alekcz-dev.firebaseapp.com/__/auth/action?mode=verifyEmail&oobCode=d6uX0gzOuvnZLAwfk8HKxLYrRUCUaBnrzwDgFdzfDhgAAAFprFHVmQ&apiKey=AIzaSyBh5FtSYL_lGcqNgyWUv9TBp_QPFqv2d5w&lang=en
+;; https://alekcz-dev.firebaseapp.com/__/auth/action?mode=verifyEmail&oobCode=d6uX0gzOuvnZLAwfk8HKxLYrRUCUaBnrzwDgFdzfDhgAAAFprFHVmQ&apiKey=AIz0000yaVaaa512312YL_lffaf311da333211TBp_QPFqvda2e1daw&lang=en
 
 
 (charm-admin/generate-password-reset-link "tony@hawk.cool")  
-;; https://alekcz-dev.firebaseapp.com/__/auth/action?mode=resetPassword&oobCode=viRcZqjCqxN6eYYmkQGY2fCZjU4RDKuNhysok83ghSEAAAFprFVwJg&apiKey=AIzaSyBh5FtSYL_lGcqNgyWUv9TBp_QPFqv2d5w&lang=en
+;; https://alekcz-dev.firebaseapp.com/__/auth/action?mode=resetPassword&oobCode=viRcZqjCqxN6eYYmkQGY2fCZjU4RDKuNhysok83ghSEAAAFprFVwJg&apiKey=AIz0000yaVaaa512312YL_lffaf311da333211TBp_QPFqvda2e1daww&lang=en
 
 ```
 
