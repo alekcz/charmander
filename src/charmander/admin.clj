@@ -65,7 +65,7 @@
 
 ; init admin api
 (defn init []
-  (let [database-name (env :firebase-database)]
+  (let [database-name (or (env :firebase-database) (env :google-cloud-project))]
     (if (nil? database-name)
       (try
           (. FirebaseAuth getInstance) 
