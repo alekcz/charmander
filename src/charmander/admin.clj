@@ -1,8 +1,9 @@
 (ns charmander.admin
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
-            [google-credentials.core :as g-cred])
+            [googlecredentials.core :as gcred])
   (:import 	com.google.auth.oauth2.GoogleCredentials
+            com.google.auth.oauth2.ServiceAccountCredentials
             com.google.firebase.FirebaseApp
             com.google.firebase.FirebaseOptions
             com.google.firebase.FirebaseOptions$Builder
@@ -29,13 +30,13 @@
   ([]
     (try 
       (-> (new FirebaseOptions$Builder) ;use thread-first when the final part of the function will return value to be used
-          (.setCredentials (g-cred/load-credentials))
+          (.setCredentials (gcred/load-service-credentials))
           (.build))
     (catch Exception e (println "\nError: FIREBASE_CONFIG/GOOGLE_APPLICATION_CREDENTIALS AND GOOGLE_CLOUD_PROJECT environment variables must both be set"))))
   ([database-name]
     (try 
       (-> (new FirebaseOptions$Builder) ;use thread-first when the final part of the function will return value to be used
-          (.setCredentials (g-cred/load-credentials))
+          (.setCredentials ^ServiceAccountCredentials (gcred/load-service-credentials))
           (.setDatabaseUrl (str "https://" database-name ".firebaseio.com"))
           (.build))
     (catch Exception e (println "\nError: FIREBASE_CONFIG/GOOGLE_APPLICATION_CREDENTIALS AND GOOGLE_CLOUD_PROJECT environment variables must both be set")))))

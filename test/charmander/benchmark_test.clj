@@ -9,7 +9,8 @@
 			[clj-uuid :as uuid]
 			[jsonista.core :as json]
             [criterium.core :as criterium]
-            [taoensso.tufte :as tufte :refer (defnp p profiled profile)]))
+            [taoensso.tufte :as tufte :refer (defnp p profiled profile)])
+    (:gen-class))
 
 (tufte/add-basic-println-handler! {})
 
