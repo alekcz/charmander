@@ -82,21 +82,21 @@
 				
 
 (deftest test-verify-token	
-	(testing "Testing the verifaction of tokens"
+	(testing "Testing the verification of tokens"
 			(let [api-key (:firebase-api env) 
 						email (str (uuid/v1) "@domain.com") 
 						password "superDuperSecure"
 						endpoint (str "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" api-key)
 						response  (charm-admin/create-user email password)
-						{:keys [status headers body error] :as resp} 
+						{:keys [_ _ body error]} 
 								@(http/request {:url endpoint 
 																:method :post 
 																:body (json/write-value-as-string {:email email :password password :returnSecureToken true})})]
+						(Thread/sleep 5000)													
 						(if error
 							(println error)
-							(let [data (json/read-value body mapper)]
-								(let [validated (charm/validate-token "(.*)" (:idToken data))]
+							(let [data (json/read-value body mapper)
+										validated (charm/validate-token "(.*)" (:idToken data))]
 									(is (= (:email validated) email))
-									(is (= (:email data) email)))))
+									(is (= (:email data) email))))
 						(charm-admin/delete-user (:uid response)))))
-

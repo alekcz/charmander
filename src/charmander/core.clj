@@ -34,9 +34,9 @@
 (defn- schedule-public-key-update 
 	"Schedules the next update of the public key based on response header cache-control info (see https://firebase.google.com/docs/auth/admin/verify-id-tokens)"
 	[thread-pool response-header]
-	(let [cache-control-header (:cache-control response-header)]
-		(let [seconds-to-next-update (Integer. (str/replace (re-find #"max-age=\d+" (str cache-control-header)) "max-age=" ""))]
-			(at/after (* 3600 seconds-to-next-update) #(load-public-keys) thread-pool :desc "Refresh public keys"))))
+	(let [cache-control-header (:cache-control response-header)
+				seconds-to-next-update (Integer. (str/replace (re-find #"max-age=\d+" (str cache-control-header)) "max-age=" ""))]
+			(at/after (* 3600 seconds-to-next-update) #(load-public-keys) thread-pool :desc "Refresh public keys")))
 
 ; Allow specific domains using regex
 
@@ -80,14 +80,23 @@
 	(let [token-array (str/split token #"\." 3)]
 		(json/read-value (base64/decode (pad-token (first token-array))) mapper)))
 
+(defn- validate-claims [data]
+	(let [now (quot (System/currentTimeMillis) 1000)]
+	(and
+		(= (str "https://securetoken.google.com/" (:aud data)) (:iss data))
+		(> (:exp data) now)
+		(< (:iat data) now)
+		(not (str/blank? (:sub data)))
+		(< (:auth_time data) now))))
+
 (defn- authenticate 
 	"Core library method. Validates token using public key and returns formatted data"
 	[projectid-regex token opts]
 	(let [header  (get-token-header token)
 				cert (keys/str->public-key ((keyword (:kid header)) @public-keys))
-				unsigned-data (if (keys/public-key? cert) (jwt/unsign token cert (merge {:alg :rs256} opts)) nil)]
-				(when (= (str "https://securetoken.google.com/" (:aud unsigned-data))
-								 (:iss unsigned-data))
+				unsigned-data (if (keys/public-key? cert) (jwt/unsign token cert (merge {:alg :rs256} opts)) nil)
+				validated? (validate-claims unsigned-data)]
+				(when validated?
 					(verify-domain projectid-regex (format-result unsigned-data)))))
 
 ; public methods
@@ -99,4 +108,4 @@
 		(if (nil? @public-keys) 
 			(do	(load-public-keys threadpool schedule-public-key-update) (authenticate projectid-regex token (merge {} opts)))
 			(authenticate projectid-regex token (merge {} opts)))
-		(catch Exception e nil)))
+		(catch Exception _ nil)))
