@@ -1,6 +1,6 @@
 (ns charmander.core
 	(:require 
-            [org.httpkit.client :as http]
+            [clj-http.client :as http]
             [jsonista.core :as json]
             [clojure.string :as str]
             [base64-clj.core :as base64]
@@ -24,7 +24,7 @@
 (defn- load-public-keys 
 	"Loads the public keys from https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com"
 	[threadpool callback]
-	(let [{:keys [_ headers body error]} @(http/get public-key-url)]
+	(let [{:keys [_ headers body error]} (http/get public-key-url)]
 	    (if error
 	       (throw (Exception. "Could not retrieve public key"))
 	       (do
