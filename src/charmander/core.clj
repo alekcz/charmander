@@ -10,7 +10,6 @@
 	(:gen-class))
 
 (def public-keys (atom nil))
-(def threadpool (at/mk-pool)) ;make threadpool for public key updates
 (def public-key-url  "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com")
 (def mapper (json/object-mapper {:decode-key-fn true}))
 
@@ -33,10 +32,14 @@
 
 (defn- schedule-public-key-update 
 	"Schedules the next update of the public key based on response header cache-control info (see https://firebase.google.com/docs/auth/admin/verify-id-tokens)"
-	[thread-pool response-header]
+	[threadpool response-header]
 	(let [cache-control-header (:cache-control response-header)
 				seconds-to-next-update (Integer. (str/replace (re-find #"max-age=\d+" (str cache-control-header)) "max-age=" ""))]
-			(at/after (* 3600 seconds-to-next-update) #(load-public-keys) thread-pool :desc "Refresh public keys")))
+			(at/after 
+				(* 1000 seconds-to-next-update) 
+				(fn [] (load-public-keys threadpool schedule-public-key-update)) 
+				threadpool 
+				:desc "Refresh public keys")))
 
 ; Allow specific domains using regex
 
@@ -106,6 +109,8 @@
 	[projectid-regex token & opts]
 	(try
 		(if (nil? @public-keys) 
-			(do	(load-public-keys threadpool schedule-public-key-update) (authenticate projectid-regex token (merge {} opts)))
+			(let [threadpool (at/mk-pool)] ;make threadpool for public key updates
+				(load-public-keys threadpool schedule-public-key-update) 
+				(authenticate projectid-regex token (merge {} opts)))
 			(authenticate projectid-regex token (merge {} opts)))
 		(catch Exception _ nil)))

@@ -59,9 +59,10 @@
 
 (deftest test-schedule-public-key-update
 	(testing "Testing schedule-public-key-update"
-		(let [threadpool (at/mk-pool) header {:cache-control "public, max-age=1000, pew pew"}]
+		(let [threadpool (at/mk-pool) header {:cache-control "public, max-age=1, pew pew"}]
 			(#'charmander.core/schedule-public-key-update threadpool header)
-			(is (= (count (at/scheduled-jobs threadpool)) 1)))))
+			(is (= (count (at/scheduled-jobs threadpool)) 1))
+			(Thread/sleep 5000))))
 
 
 (deftest test-verify-domain
