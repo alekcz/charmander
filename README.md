@@ -16,7 +16,7 @@ A clojure library to make working with firebase easier
 
 ```clojure
 
-[alekcz/charmander "1.0.1"]
+[alekcz/charmander "1.0.2"]
 
 ;; In your ns statement:
 (ns my.ns
