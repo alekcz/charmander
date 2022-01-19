@@ -1,0 +1,24 @@
+name: branches
+
+on: [push, pull_request]
+  branches:
+    - '*'
+    - '!master'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: lein deps
+    - name: Run tests
+      env: 
+        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        FIREBASE_CONFIG: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        GOOGLE_CLOUD_PROJECT: ${{ secrets.GOOGLE_CLOUD_PROJECT }}
+        FIREBASE_API: ${{ secrets.FIREBASE_API }}    
+      run: |
+        lein cloverage
