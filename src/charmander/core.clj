@@ -88,9 +88,9 @@
 	(and
 		(= (str "https://securetoken.google.com/" (:aud data)) (:iss data))
 		(> (:exp data) now)
-		(< (:iat data) now)
+		(<= (:iat data) now)
 		(not (str/blank? (:sub data)))
-		(< (:auth_time data) now))))
+		(<= (:auth_time data) now))))
 
 (defn- authenticate 
 	"Core library method. Validates token using public key and returns formatted data"
