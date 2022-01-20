@@ -10,6 +10,7 @@
 	(:gen-class))
 
 (def public-keys (atom nil))
+(def threads (atom nil))
 (def public-key-url  "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com")
 (def mapper (json/object-mapper {:decode-key-fn true}))
 
@@ -108,8 +109,10 @@
 	"Public method that validates token and makes sure the issuing domain is also valid"
 	[projectid-regex token & opts]
 	(try
+    (when-not @threads 
+      (reset! threads (at/mk-pool)))
 		(if (nil? @public-keys) 
-			(let [threadpool (at/mk-pool)] ;make threadpool for public key updates
+			(let [threadpool @threads] ;make threadpool for public key updates
 				(load-public-keys threadpool schedule-public-key-update) 
 				(authenticate projectid-regex token (merge {} opts)))
 			(authenticate projectid-regex token (merge {} opts)))
