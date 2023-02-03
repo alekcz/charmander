@@ -215,4 +215,13 @@
 (deftest test-delete-user-error
 	(testing "Testing the  setting of user password"
 		(let [response (#'charmander.admin/delete-user "123abc123abcNotThere")]
-			(is (contains? response :error)))))				
+			(is (contains? response :error)))))
+
+(deftest test-create-user
+	(testing "Testing the creating  of new users"
+		(let [unique (str (uuid/v1))]
+			(let [response  (#'charmander.admin/create-user (str unique "@domain.com") "superDuperSecure")
+						token 		(#'charmander.admin/generate-custom-token unique)]
+				(do
+					(is (string? token))
+					(#'charmander.admin/delete-user (:uid response)))))))

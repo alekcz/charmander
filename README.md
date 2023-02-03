@@ -1,8 +1,7 @@
 # Charmander
+This is a fork of ![alekcz/charmander](https://github.com/alekcz/charmander) to add functionality for custom-tokens
 
 A clojure library to make working with firebase easier
-
-![master](https://github.com/alekcz/charmander/workflows/master/badge.svg) [![codecov](https://codecov.io/gh/alekcz/charmander/branch/master/graph/badge.svg)](https://codecov.io/gh/alekcz/charmander)
 
 [![Clojars Project](https://img.shields.io/clojars/v/alekcz/charmander.svg)](https://clojars.org/alekcz/charmander)
 
@@ -16,7 +15,7 @@ A clojure library to make working with firebase easier
 
 ```clojure
 
-[alekcz/charmander "1.0.3"]
+[hp-tech-product/charmander "1.0.3"]
 
 ;; In your ns statement:
 (ns my.ns

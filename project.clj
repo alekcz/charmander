@@ -1,6 +1,6 @@
-(defproject alekcz/charmander "1.0.3"
-  :description "Charmander: a set of libraries to make working with firebase easier in clojure"
-  :url "https://github.com/alekcz/charmander"
+(defproject hp-tech-product/charmander "1.0.4"
+  :description "Charmander: a set of libraries to make working with firebase easier in clojure. A fork of https://github.com/alekcz/charmander"
+  :url "https://github.com/hp-tech-product/charmander"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [ [org.clojure/clojure "1.10.0"]
