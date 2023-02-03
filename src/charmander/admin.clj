@@ -158,3 +158,9 @@
     (let [firebase-auth (. FirebaseAuth getInstance)]
       (. firebase-auth generateEmailVerificationLink email))
       (catch Exception e {:error true :error-data (format-error e)})))
+
+(defn generate-custom-token [uuid]
+  (try
+    (let [firebase-auth (. FirebaseAuth getInstance)]
+      (. firebase-auth createCustomToken uuid))
+    (catch Exception e {:error true :error-data (format-error e)})))
