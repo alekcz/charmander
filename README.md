@@ -3,7 +3,7 @@ This is a fork of ![alekcz/charmander](https://github.com/alekcz/charmander) to 
 
 A clojure library to make working with firebase easier
 
-[![Clojars Project](https://img.shields.io/clojars/v/alekcz/charmander.svg)](https://clojars.org/alekcz/charmander)
+[![Clojars Project](https://img.shields.io/clojars/v/alekcz/charmander.svg)](https://clojars.org/org.clojars.tech-product-hp/charmander)
 
 ## Why?
 
@@ -15,7 +15,7 @@ A clojure library to make working with firebase easier
 
 ```clojure
 
-[hp-tech-product/charmander "1.0.3"]
+[hp-tech-product/charmander "1.0.4"]
 
 ;; In your ns statement:
 (ns my.ns
