@@ -1,5 +1,6 @@
 (ns charmander.admin
   (:require [clojure.java.io :as io]
+            [clojure.walk :as w]
             [environ.core :refer [env]]
             [googlecredentials.core :as gcred])
   (:import 	com.google.auth.oauth2.GoogleCredentials
@@ -58,7 +59,8 @@
     :photo-url (. user-record getPhotoUrl)
     :phone-number (. user-record getPhoneNumber)
     :display-name (. user-record getDisplayName)
-    :disabled (. user-record isDisabled)})
+    :disabled (. user-record isDisabled)
+    :custom-claims (. user-record getCustomClaims)})
 
 (defn- format-error [error]
    (. error getMessage))
@@ -163,4 +165,10 @@
   (try
     (let [firebase-auth (. FirebaseAuth getInstance)]
       (. firebase-auth createCustomToken uuid))
+    (catch Exception e {:error true :error-data (format-error e)})))
+
+(defn set-custom-user-claims [uuid ^clojure.lang.PersistentHashMap claims]
+  (try
+    (let [firebase-auth (. FirebaseAuth getInstance)]
+      (. firebase-auth setCustomUserClaims uuid (java.util.HashMap. claims)))
     (catch Exception e {:error true :error-data (format-error e)})))

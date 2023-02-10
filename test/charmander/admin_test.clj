@@ -217,11 +217,23 @@
 		(let [response (#'charmander.admin/delete-user "123abc123abcNotThere")]
 			(is (contains? response :error)))))
 
-(deftest test-create-user
-	(testing "Testing the creating  of new users"
+(deftest test-generate-custom-token
+	(testing "Testing the generation of custom tokens"
 		(let [unique (str (uuid/v1))]
 			(let [response  (#'charmander.admin/create-user (str unique "@domain.com") "superDuperSecure")
 						token 		(#'charmander.admin/generate-custom-token unique)]
 				(do
 					(is (string? token))
 					(#'charmander.admin/delete-user (:uid response)))))))
+
+(deftest test-set-custom-user-claims
+	(testing "Testing the retrieval of user by uid or by email"
+		(let [unique (str (uuid/v1))]
+			(let [prep (#'charmander.admin/create-user (str unique "@domain.com") "superDuperSecure")
+						claims {:admin true
+										:test true}]
+				(#'charmander.admin/set-custom-user-claims (:uid prep) claims)
+				(let [response (#'charmander.admin/get-user (:uid prep))]
+					(is (contains? response :custom-claims))
+					(is ((get (:custom-claims response) "admin") true))
+					(#'charmander.admin/delete-user (:uid prep)))))))
