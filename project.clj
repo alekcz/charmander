@@ -1,4 +1,4 @@
-(defproject alekcz/charmander "1.0.3"
+(defproject alekcz/charmander "1.0.4"
   :description "Charmander: a set of libraries to make working with firebase easier in clojure"
   :url "https://github.com/alekcz/charmander"
   :license {:name "Eclipse Public License"
@@ -26,8 +26,7 @@
                   [criterium "0.4.5"]
                   [com.taoensso/tufte "2.1.0"]
                   [alekcz/googlecredentials "3.0.1"]]
-                  
+  :javac-options ["--release" "8" "-g"]                
   :repl-options {:init-ns charmander.database}       
-  :aot :all
   :plugins [[lein-ancient "0.6.15"]
             [lein-cloverage "1.1.2"]])
