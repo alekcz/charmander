@@ -27,16 +27,16 @@
 ; private methods
 
 (defn- build-firebase-options 
-  ([]
+  ([env-var]
     (try 
       (-> (new FirebaseOptions$Builder) ;use thread-first when the final part of the function will return value to be used
-          (.setCredentials (gcred/load-service-credentials))
+          (.setCredentials (gcred/load-service-credentials env-var))
           (.build))
     (catch Exception e (println "\nError: FIREBASE_CONFIG/GOOGLE_APPLICATION_CREDENTIALS AND GOOGLE_CLOUD_PROJECT environment variables must both be set"))))
-  ([database-name]
+  ([database-name env-var]
     (try 
       (-> (new FirebaseOptions$Builder) ;use thread-first when the final part of the function will return value to be used
-          (.setCredentials ^ServiceAccountCredentials (gcred/load-service-credentials))
+          (.setCredentials ^ServiceAccountCredentials (gcred/load-service-credentials env-var))
           (.setDatabaseUrl (str "https://" database-name ".firebaseio.com"))
           (.build))
     (catch Exception e (println "\nError: FIREBASE_CONFIG/GOOGLE_APPLICATION_CREDENTIALS AND GOOGLE_CLOUD_PROJECT environment variables must both be set")))))
@@ -65,19 +65,22 @@
 ; public methods
 
 ; init admin api
-(defn init []
-  (let [database-name (or (env :firebase-database) (env :google-cloud-project))]
-    (if (nil? database-name)
-      (try
-          (. FirebaseAuth getInstance) 
-        (catch IllegalStateException ise
-          (let [options (build-firebase-options)]
-            (. FirebaseApp initializeApp options)))))
-      (try
-          (. FirebaseAuth getInstance) 
-        (catch IllegalStateException ise
-          (let [options (build-firebase-options database-name)]
-            (. FirebaseApp initializeApp options))))))
+(defn init 
+  ([]
+    (init "GOOGLE_APPLICATION_CREDENTIALS"))
+  ([^String env-var]
+    (let [database-name (or (env :firebase-database) (env :google-cloud-project))]
+      (if (nil? database-name)
+        (try
+            (. FirebaseAuth getInstance) 
+          (catch IllegalStateException ise
+            (let [options (build-firebase-options env-var)]
+              (. FirebaseApp initializeApp options)))))
+        (try
+            (. FirebaseAuth getInstance) 
+          (catch IllegalStateException ise
+            (let [options (build-firebase-options database-name env-var)]
+              (. FirebaseApp initializeApp options)))))))
 
 ; user management api
 
