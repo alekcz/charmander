@@ -1,4 +1,4 @@
-(defproject org.clojars.tech-product-hp/charmander "1.0.6"
+(defproject org.clojars.tech-product-hp/charmander "1.0.7-unstable"
   :description "Charmander: a set of libraries to make working with firebase easier in clojure. A fork of https://github.com/alekcz/charmander"
   :url "https://github.com/hp-tech-product/charmander"
   :license {:name "Eclipse Public License"
