@@ -60,7 +60,8 @@
     :phone-number (. user-record getPhoneNumber)
     :display-name (. user-record getDisplayName)
     :disabled (. user-record isDisabled)
-    :custom-claims (. user-record getCustomClaims)})
+    :custom-claims (. user-record getCustomClaims)
+    :metadata (. user-record getUserMetadata)})
 
 (defn- format-error [error]
    (. error getMessage))
