@@ -132,6 +132,18 @@ The admin api only allows the creating of users using the email/password sign-in
 ;;    :disabled false
 ;;}
 
+(charm-admin/create-user "email@domain.com" "superstrong6characterpassword" "my-very-own-custom-uuid")  
+;;{   
+;;    :email email@domain.com
+;;    :email-verified false
+;;    :uid my-very-own-custom-uuid
+;;    :provider-id firebase
+;;    :photo-url nil
+;;    :phone-number nil
+;;    :display-name nil
+;;    :disabled false
+;;}
+
 (charm-admin/get-user "vMnMJvS28kWr5pb6sByHULMLelJ3")  
 ;;{   
 ;;    :email email@domain.com

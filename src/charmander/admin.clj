@@ -42,13 +42,22 @@
     (catch Exception e (println "\nError: FIREBASE_CONFIG/GOOGLE_APPLICATION_CREDENTIALS AND GOOGLE_CLOUD_PROJECT environment variables must both be set")))))
   
 
-(defn- build-create-user-request [email password] 
-  (let [create-request (new UserRecord$CreateRequest)]
-      (doto create-request ;doto mutates the object. Use it when you're going to return the object
-        (.setEmail email)
-        (.setPassword password)
-        (.setEmailVerified false)
-        (.setDisabled false))))
+(defn- build-create-user-request 
+  ([email password] 
+    (let [create-request (new UserRecord$CreateRequest)]
+        (doto create-request ;doto mutates the object. Use it when you're going to return the object
+          (.setEmail email)
+          (.setPassword password)
+          (.setEmailVerified false)
+          (.setDisabled false))))
+  ([email password uid] 
+    (let [create-request (new UserRecord$CreateRequest)]
+        (doto create-request ;doto mutates the object. Use it when you're going to return the object
+          (.setUid uid)
+          (.setEmail email)
+          (.setPassword password)
+          (.setEmailVerified false)
+        (.setDisabled false)))))
 
 (defn- convert-user-record-to-map [^UserRecord user-record]
   { :email (. user-record getEmail)
@@ -84,12 +93,19 @@
 
 ; user management api
 
-(defn create-user [email password]
-  (try
-    (let [firebase-auth (. FirebaseAuth getInstance) 
-        create-request (build-create-user-request email password)]
-      (convert-user-record-to-map (. firebase-auth createUser create-request)))
-      (catch Exception e {:error true :error-data (format-error e)})))
+(defn create-user 
+  ([email password]
+    (try
+      (let [firebase-auth (. FirebaseAuth getInstance) 
+          create-request (build-create-user-request email password)]
+        (convert-user-record-to-map (. firebase-auth createUser create-request)))
+        (catch Exception e {:error true :error-data (format-error e)})))
+  ([email password uid]
+    (try
+      (let [firebase-auth (. FirebaseAuth getInstance) 
+          create-request (build-create-user-request email password uid)]
+        (convert-user-record-to-map (. firebase-auth createUser create-request)))
+        (catch Exception e {:error true :error-data (format-error e)}))))
 
 (defn delete-user [uuid]
   (try
