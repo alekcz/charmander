@@ -15,7 +15,7 @@
 	"Template for tests"
 
 	(deftest test-tempate
-		(testing "Testing functionname"
+		(testing "Testing function name"
 			(let [data "" other ""]
 				(do
 					(is (= (#'charmander.admin/privatefunction inputs) answer))
@@ -40,7 +40,17 @@
 						(is (= (:email response) (str unique "@domain.com"))) 
 						(is (not (= response response2)))
 						(#'charmander.admin/delete-user (:uid response)))))))
-						
+
+(deftest test-create-user-with-uid
+	(testing "Testing the creating of new users with uid"
+			(let [unique (str (uuid/v1) "-" (uuid/v1))]
+				(let [response  (#'charmander.admin/create-user (str unique "@domain.com") "superDuperSecure" unique)
+							response2 (#'charmander.admin/create-user (str unique "+other@domain.com") "superDuperSecure" unique)]
+					(do
+						(is (= (:email response) (str unique "@domain.com"))) 
+						(is (not (= response response2)))
+						(#'charmander.admin/delete-user unique))))))
+
 (deftest test-all-get-users
 	(testing "Testing the retrieval of user by uid or by email"
 			(let [unique (str (uuid/v1))]
