@@ -58,6 +58,7 @@
 	(when (not (nil? data))
 		{ :projectid (:aud data)
 			:uid (:user_id data)
+			:name (:name data)
 			:email (:email data)
 			:email_verified (:email_verified data)
 			:sign_in_provider (-> data :firebase :sign_in_provider)
